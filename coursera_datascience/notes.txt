@@ -1,0 +1,5 @@
+Configure Git in RStudio:
+https://github.com/lgreski/datasciencectacontent/blob/master/markdown/configureRStudioGitWindowsVersion.md
+
+80 free data science books:
+https://www.datasciencecentral.com/profiles/blogs/80-free-data-science-books
