@@ -1,20 +1,26 @@
+# course_week: 2.4
+# description: read file, filter by variable parameter, sort by second parameter, make df of best of sorted variable
+# make generic: yes
 best <- function(state, outcome){
-  outcomeData <- read.csv("outcome-of-care-measures.csv", colClass = "character")
+  outcomeData <- read.csv("outcome-of-care-measures.csv", colClass = "character") # set all of the columns as character vectors
   switch(outcome, 
          "heart attack" = outcomeCol <- 11,
          "heart failure" = outcomeCol <- 17,
          "pneumonia" = outcomeCol <- 23, stop("invalid outcome"))
-  stateSelector <- outcomeData$State == state
+  stateSelector <- outcomeData$State == state # take the state column
   outcomeState <- outcomeData[stateSelector, ]
-  outcomeState[, outcomeCol] <- as.numeric(outcomeState[, outcomeCol])
-  complete <- complete.cases(outcomeState[, outcomeCol])
+  outcomeState[, outcomeCol] <- as.numeric(outcomeState[, outcomeCol]) # convert to numeric
+  complete <- complete.cases(outcomeState[, outcomeCol]) 
   outcomeStateComplete <- outcomeState[complete, ]
-  sortedOutcome <- sort(outcomeStateComplete[, outcomeCol])
-  minHospitals <- outcomeStateComplete[, outcomeCol] == sortedOutcome[1]
-  hospitalNames <- outcomeStateComplete[minHospitals, 2]
+  sortedOutcome <- sort(outcomeStateComplete[, outcomeCol]) # sort by the outcome column
+  minHospitals <- outcomeStateComplete[, outcomeCol] == sortedOutcome[1] # take the minimum value of the sorted column
+  hospitalNames <- outcomeStateComplete[minHospitals, 2] # make a data frame of the best row(s)
   hospitalNames
 }
 
+# course_week: 2.4
+# description: read file, filter by variable parameter, order by second variable, return name of row in third-variable place
+# make generic: yes
 rankhospital <- function(state, outcome, num) {
   outcomeData <- read.csv("outcome-of-care-measures.csv", colClass = "character")
   switch(outcome, 
@@ -33,6 +39,9 @@ rankhospital <- function(state, outcome, num) {
   hospitalName
 }
 
+# course_week: 2.4
+# description: read file, filter by variable parameter, split, take the second-variable place in each partition, return df of results
+# make generic: yes
 rankall <- function(outcome, num = "best") {
   outcomeData <- read.csv("outcome-of-care-measures.csv", colClass = "character")
   switch(outcome, 
