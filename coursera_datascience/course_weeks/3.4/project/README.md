@@ -1,6 +1,6 @@
 Author: Andrew Hope
 
-Coursera - Data Science - Johns Hopkins University
+Coursera - Data Science - Johns Hopkins University  
 Course 3 - Getting and Cleaning Data - Week 4 Project
 
 =========
