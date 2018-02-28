@@ -1,6 +1,6 @@
 plot2 <- function(download = FALSE) {
   if(download == TRUE) {
-    grab(data, "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip", "household_power_consumption.zip", read = FALSE, unzip = TRUE)
+    grab("data", "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip", "household_power_consumption.zip", read = FALSE, unzip = TRUE)
   }
   # get data
   tenrows <- read.table("data/household_power_consumption.txt", header = TRUE, sep = ";", nrows = 10)
