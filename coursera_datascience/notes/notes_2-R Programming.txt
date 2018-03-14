@@ -1,0 +1,92 @@
+Course 2 - R Programming
+ + Week 1
+	- Data types
+		+ Atomic classes: character, logical, numeric, integer, complex
+		+ Objects: 
+			- Vectors: all entries of the same class
+			- Matrices: 2-dimensional vector
+			- List: data can be of different classes
+			- Dataframe: "list of vectors", each column is a vector, a row is a list since the columns are of different classes
+		+ Attributes: part of an object
+			- names, dimnames, dimensions, class, length, etc.
+			- attributes() function
+		+ Factors
+			- create ordered or unordered factors with factor() function
+			- view config of a factor object with unclass function
+	- Reading data
+		+ read.table, read.csv - Reading data into a dataframe. Memorize the help text.
+		+ readLines - Reading text data into a character vector
+		+ source - Reading R codes
+		+ dget - Reading R objects that have been parsed into text files
+		+ load, serialize - Reading binary files
+	- Reading Large data
+		+ If no commented data, set comment.char = ""
+		+ Use colClasses parameter. 
+	- Textual data format
+		+ dump()/source() and dput()/dget() produce/retrieve text-representation of an R-object
+		+ metadata stored along with content
+		+ better for long-term storage and recovery
+		+ good for open source collaboration and version control
+		+ dump can handle multiple objects in one call, dput can not
+	- Connections
+		+ file()
+		+ url()
+		+ gzfile()
+		+ more control when reading lines from a file or url
+	- Subsetting
+		+ complete.cases and is.na -- I've been doing these right. Create the logical vector and apply it.
+		+ [ always returns an object of the same class of what you're subsetting (vector, list, dataframe)
+		+ [ can be used to select more than one element
+		+ [[ is used for a list or dataframe. The class of the object returned will be whatever the class of the element is
+		+ [[ can only select a single element, not a range
+		+ [[ can take a variable as the index, $ must use the literal name
+		+ $ is used for named objects in a list or dataframe. The class of the object returned will be whatever the class of the element is
+		+ x[x > a] returns just the values satisfying the criteria
+		+ x > a returns a logical vector constructed by the criteria
+ + Week 2
+	- Control structures
+		+ If-else, For, While, Repeat, Next, Break
+	- Functions
+	- Scoping rules
+		+ R attempts to bind values to symbols by searching through environments
+		+ search() shows the hierarchy of environments
+		+ starts with GlobalEnv, ends with base package
+		+ lexical scoping (static scoping)
+			- the values of free variables are searched for in the environment in which the function was defined
+			- function + environment = closure
+	- Dates and times
+		+ date, POSIXct, POSIXlt classes
+		+ ct = count? seconds since inception
+		+ lt = list. structured list.
+ + Week 3
+	- Loop functions
+		+ lapply, sapply - takes a list, applies a function, returns a list.
+		+ apply - works on the margin of an array. 
+			- takes array, margin, and function params
+				+ margin is a vector of dimensions you want to preserve.
+			- rowSums, rowMeans, colSums, colMeans
+		+ mapply - multivariate version
+			- apply a function with lists as parameters of the function
+			- function must take at least as many args as lists you provide
+		+ tapply - works on a subset of a vector
+			- takes a vector, a factor, and a function
+			- apply the function to each factor-group and return a list
+			- the list will have a length equal to the number of unique factor values
+		+ split - just does the split portion. returns a list.
+	- Debugging tools
+		+ traceback - dump call stack
+		+ debug - debug mode on a function (triggered by function call)
+		+ browser - breakpoint
+		+ trace - insert debugging code into a function without editing the function
+		+ recover - modify the function calls up the stack trace
+ + Week 4
+	- str
+	- simulation
+		+ rnorm, dnorm, pnorm, qnorm
+		+ r = random, d = density, p = cumulative, q = quantile
+		+ norm, pois, gamma, beta, etc.
+		+ set.seed()
+	- R profiler
+		+ evaluate performance
+		+ system.time()
+		+ Rprof(), summaryRprof()

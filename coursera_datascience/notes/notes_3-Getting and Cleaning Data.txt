@@ -1,0 +1,101 @@
+Course 3 - Getting and Cleaning Data
+ + Week 1
+	- Components of tidy data
+	- Downloading files
+	- Reading data
+		+ local files
+		+ excel files 
+			- read.xlsx
+			- write.xlsx
+		+ XML
+			- library(XML)
+			- doc <- xmlTreeParse()
+			- root <- xmlRoot(doc)
+			- xmlName(node)
+			- root[[1]][[1]]
+			- xmlSApply(root, xmlValue)
+			- XPath
+				+ /node - top level node
+				+ //node - node at any level
+				+ node[@attr-name='name']
+				+ xpathSApply(root, "//node", xmlValue)
+		+ JSON
+			- library(jsonlite)
+			- jsonData <- fromJSON(url)
+			- names(jsonData$node)
+			- myjson <- toJSON(dataframe)
+	- data.table
+		+ inherits from dataframe
+		+ much faster
+ + Week 2
+	- Reading from MySQL
+	- Reading from HDF5
+	- Reading from the web
+**	- Reading from APIs
+ + Week 3
+	- Subsetting and sorting
+		+ X[which(X$var2 > 0),] -- the which command returns the indices that adhere to the logical statement, and won't return NAs as true.
+		+ sort(X$var1, decreasing=TRUE, na.last=TRUE)
+		+ X[order(X$var1),] -- the order command returns indices of values that come in the nth order.
+		+ library(plyr)
+			- arrange(X, var1)
+		+ Adding columns: 
+			- X$varNew <- vector
+			- cbind(X, vector)
+	- Summarizing data
+		+ head(), tail()
+		+ summary()
+		+ str()
+		+ quantile()
+		+ table() - count values by factor variable provided
+		+ checking for null values:
+			- any(is.na(dataframe))
+			- all(is.na(dataframe))
+		+ colsums, rowsums
+		+ table(X$var1 %in% vector)
+		+ X[X$var1 %in% vector]
+		+ xtabs -- more advanced table. show values by variables.
+		+ object.size(dataframe)
+	- Creating new variables
+		+ seq() -- creates an index
+		+ seq(along = x)
+		+ logical variable -- X$varNew = logical condition on an exsiting variable
+		+ categorical variable -- X$varNew = cut(X$var, breaks)
+		+ factor variable -- X$varNew <- factor(X$var) 
+		+ mutate(X, varNewVector)
+	- Reshaping data
+		+ tidyr
+			- melt -- two columns into one
+		+ dcast -- subset a dataframe, apply summary functions
+		+ tapply -- apply a function to a column
+		+ ddply -- split, apply, combine
+	- dplyr
+		+ filter
+		+ select
+		+ arrange
+		+ rename
+		+ mutate
+		+ do not need $
+	- merging data
+		+ merged <- merge(df1, df2, by.x = name, by.y = name, all = TRUE)
+		+ plyr join -- requires column names in common
+ + Week 4
+	- Editing text variables
+		+ strsplit(vector, splitchar)
+		+ sapply()
+		+ sub() - replaces first match
+		+ gsub() - replace all matches
+		+ grep() - return indexes of matches
+			- VALUE=TRUE
+		+ grepl() - return logical vector of matches
+			- Can use for subsetting -- dataset[!grepl("string", dataset$var),]
+		+ library(stringr)
+	- Regular expressions
+		+ cheatsheets
+		+ learn later
+	- Working with dates
+		+ lubridate
+	- Data sources
+		+ twitteR
+		+ RGoogleMaps
+		+ CMU Statlib

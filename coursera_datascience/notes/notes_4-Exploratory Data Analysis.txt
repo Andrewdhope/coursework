@@ -1,0 +1,169 @@
+Course 4 - Exploratory Data Analysis
+ - Week 1, Week 2
+	+ Graphs
+		- Principles of Analytic Graphs
+			+ Show comparisons
+			+ Show causality, mechanism, explanation, systematic structure
+			+ Show multivariate data
+			+ Integrate multiple modes of evidence
+				- graphics, text, color, etc.
+				- Don't let the tools constrain the delivery
+			+ Describe and document evidence with labels, scales, sources
+			+ Content is king
+		- Exploratory Graphs
+			+ Quick and dirty
+			+ summary(dataframe$variable)
+			+ with(dataframe, plot(var1, var2))
+			+ boxplot(dataframe$variable, col = "blue")
+			+ hist(dataframe$variable, col = "green", breaks = 100)
+			+ abline(h) -- horizontal line
+			+ abline(v) -- vertical line
+			+ barplot
+			+ with(dataframe, plot(var1, var2))
+			+ multivariable
+				- essentially just arrange 1-D or 2-D plots in a way to show additional variables
+				- color to add another dimension
+	+ Plotting
+		- Base plotting 
+			+ parameters
+				- pch (plotting character, default is circle)
+				- lty (line type, default is solid)
+				- lwd (line width)
+				- col (color specified by number, string, or hex code)
+				- xlab, ylab (axis labels)
+			+ par -- global graphics parameters, not all can be changed in the function call
+				- las (orientation of axis on labels)
+				- bg (background color)
+				- mar (margin size)
+				- oma (outer margin)
+				- mfrow, mfcol (number of plots per row, col)
+			+ functions
+				- plot (scatterplots)
+				- lines (add lines connecting points)
+				- abline (add line with intercept and slope)
+				- points (add points)
+				- text (add text within the plot)
+				- title (add labels outside of the plot)
+				- mtext (add margin text, such as label over a set of plots)
+				- axis (specify axis tics)
+		- Lattice 
+			+ Good for multi-dimensional. Produces many x-y plots for different z-values.
+			+ xyplot(y ~ x | f*g, data, ...)
+			+ bwplot, histogram, dotplot, etc.
+			+ technically returns a trellis object, which is default-printed to the screen object
+				- can instead save trellis object
+			+ panel function controls individual plots. Can customize with panel parameter.
+		- ggplot2
+			+ qplot(var1, var2, data = dframe, color = as.factor(var), geom = c("point", "smooth"), facets = . ~ var)
+			+ g <- ggplot(df, aes(x, y))
+			+ g + ...
+				- facets: row ~ column. dot is used when you want facets of a single variable. 
+					+ facet_grid(. ~ var)
+				- geom: point, density
+					+ geom_point(alpha = 1/2)
+					+ geom_smooth(method = "lm", size, linetype, se = TRUE)
+				- aesthetics can align with a variable (color = var1, shape = var2)
+					+ cut() and quantiles() can split numeric data in to categorical
+				- stats: smoothing, binning, quantiles, transformations
+				- scales: how to map an aesthetic to a variable...?
+				- coordinate system
+			+ labels: xlab, ylab, labs, ggtitle
+			+ theme: for global settings, like legend position, or background colors
+				- theme_bw()
+			+ How do you know when to add a new expression vs a parameter for an existing one? (vs a function as a param?)
+				- If you're setting an aesthetic as a constant, use the aesthetic's variable. If the aesthetic is assigned a variable, you need to wrap it in aes().
+	+ Graphics Devices
+		- screen
+		- file
+			+ PDF
+				- pdf(file = "myplot.pdf")
+				- with(dataset, plot(var1, var2))
+				- dev.off()
+			+ PNG (images), JPEG (photos)
+			+ SVG (scaled vector graphic)
+		- dev.cur(), dev.set() -- control which graphics device is active
+		- dev.copy -- copy plots
+	+ Colors
+		+ grDevices package
+		+ colors() has 657 named colors
+		+ colorRamp(c(color1, color2)) returns a gradient from 0-1 for the color parameter
+			- actually returns a function that takes a number vector as a parameter
+			- could provide a seq(0, 1, length = 10) to return many values from the gradient
+		+ colorRampPalette(c(color1, color2)) returns an object that holds a gradient
+			- the "gradient object" takes an integer argument and returns "i" gradient values at 1/i intervals
+			- actually returns a function that takes a number vector as a parameter
+			- what happens when you give more than 2 colors?
+		+ colorRamp is a wrapper to call rgb, which constructs a color
+		+ 0x## converts a hexadecimal to an integer
+		+ rgb takes red, blue, green, and alpha (opacity)
+		+ colorspace package for additional control over colors
+		+ RColorBrewer -- pre-defined, named palettes
+			- sequential (light to dark)
+			- divergent	(light in the middle, for showing deviation)
+			- qualitative (equally intense, different colors, for unordered data)
+		
+ - Week 3
+	+ Hierarchical clustering
+		- agglomerative approach: iterate through points and add the closest into a cluster
+		- do this until the distance between points is to large, or the points are no longer similar...?
+		- euclidian distance vs. manhattan distance vs. correlation similarity 
+		- distance between clusters
+			+ complete linkage -- farthest points
+			+ average linkage -- distance of clusters 'center of gravity'
+		- hclust(dist(dataframe)) -- will calculate distance with many variables
+		- plot(as.dendrogram(hclust(dist(dataFrame))))
+			+ creates a dendrogram given a distance matrix	
+		- heatmap(matrix)
+			+ heatmap performs clustering as well as adding color
+	+ K means clustering
+		- "aims to partition the points into k groups such that the sum of squares from points to the assigned cluster centers is minimized."
+		- start with K, a distance metric, and an initial guess of centriods
+		- apply(distmatrix, 2, which.min) -- creates a factor vector from a distance matrix
+		- kmeans(datamatrix, centers, iter.max, nstart)
+			+ centers is either a number of clusters, or a set of starting centroids
+			+ nstarts is the number of random starts to try when centers is a number
+			+ iter.max is max iterations
+		- kmeansObj <- kmeans(...)
+			+ cluster
+			+ centers
+			+ totss
+			+ etc.
+	+ Dimension reduction
+		https://georgemdallas.wordpress.com/2013/10/30/principal-component-analysis-4-dummies-eigenvectors-eigenvalues-and-dimension-reduction/
+		https://en.wikipedia.org/wiki/Principal_component_analysis
+		- find a smaller number of variables that are uncorrelated AND explain as much variance as possible
+			+ remove (redundant) correlated variables, and keep the ones that explain the variance in the original data
+		- basic concept is to look at marginal means (and means of each variable, and observation) -- can they be clustered?
+		- principal component analysis (PCA)
+			+ principal components are equal to the right-singular values (V, column) after the data is scaled (subtract the mean, divide by std (normalized?))
+			+ related to eigenvectors and eigenvalues. eigenvectors are "directions" in m x n space, and eigenvalues measure the variance of the all data in that direction.
+				- one eigenvector per dimension (variable)
+				- eigenvectors measure total variance (of all the data) along a direction. 
+				- the dimension with the highest eigenvalue is the principle component.				
+			+ Wikipedia: 
+				- Principal component analysis (PCA) is a statistical procedure that uses an orthogonal transformation to convert a set of observations of possibly correlated variables into a set of values of linearly uncorrelated variables called principal components.
+				- PCA can be done by eigenvalue decomposition of a data covariance (or correlation) matrix or singular value decomposition of a data matrix, usually after mean centering (and normalizing or using Z-scores) the data matrix for each attribute.
+				- PCA defines a new orthogonal coordinate system that optimally describes variance in a single dataset.
+		- singular value decomposition (SVD)
+			+ re-expressing an m x n matrix as a product of components X = UDV^t
+			+ the components rank the variables by percent variance explained and allow you to reduce dimensions / compress data
+			+ an algorithm that can pick up on clustering in analysis-of-variance-like dimensional comparisons
+			+ you're plotting the scaled marginal means as expressed in std-from-grand-mean for both rows (U - left), and (V - right)
+			+ then you're looking for clusters in those plots. clusters will indicate... correlation and/or variance?
+			+ matrix X = UDV^T
+			+ columns of U and V are orthogonal, they are the left-singular and right-singular respectively
+				- left and right apply to marginal (?) left being rows and right being columns (?)
+				- and then first, second, third singular apply to individual variables (?) ordered by percent variance (?)
+			+ D is a diagonal matrix, singular values
+				- columns ordered by percentage of overall variance explained
+			
+		- Advanced Data Analysis from an Elementary Point of View
+		- Alternatives: Factor analysis, Independent components analysis, Latent semantic analysis
+
+- Week 4
+	+ Case Studies
+		- read.table("RD_501_88101_1999-0.txt", comment.char = "#", header = FALSE, sep = "|", na.strings = "")
+		- make.names(cnames) -- makes valid column names
+		- subset(dataframe, condition, columnSelection)
+		- aggregate(X ~ y + z)
+	+ side note: Pearson correlation coefficient is the most commonly used measure of correlation, however, the Pearson coefficient only assesses a linear relationship between two variables. The variables could hold a strong non-linear relationship with a Pearson coefficient of 0. Also, the Pearson coefficient measures noisiness and direction, but not the slope of the linear relationship.

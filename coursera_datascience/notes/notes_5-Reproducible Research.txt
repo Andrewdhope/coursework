@@ -1,0 +1,83 @@
+- Week 1
+	+ The ultimate standard for strengthening scientific evidence is replication of findings
+	+ Can't usually replicate the whole experiment, but you can reproduce the computation with the original data
+	+ High throughput data generation, every field has a computational version of it (e.g. computational biology)
+	+ Required elements
+		- Analytic data (not necessarily raw data)
+		- Analytic code
+		- Documentation of code and data
+		- Standard means of transportation
+	+ Literate (Statistical) Programming
+		- Analysis described in a series of text and code chunks
+			+ Sweave -- LaTeX plus R
+			+ knitr -- modern alternative for sweave
+				- R plus Markdown, HTML, LaTeX
+		- Script everything. No user input required. 
+	+ knitr
+		- 
+		
+	+ Steps in Data Analysis
+		- Define the question
+			+ The most powerful dimension reduction techinque
+		- Define the ideal data set
+		- Determine what data you can access
+		- Obtain the data
+			+ Try to obtain the raw data
+			+ Always reference the source
+				- If using an internet source, include the url and the time accessed
+		- Clean the data
+		- Exploratory data analysis
+		- Statistical prediction/modeling
+		- Interpret results
+		- Challenge results
+		- Synthesize/write up results
+			+ Lead with the question
+			+ Explain and order the analysis in the context of a story
+		- Create reproducible code
+			+ knitr to preserve code and documentation in a single document
+	+ Organizing data analysis
+		- Raw data transformed to (tidy) processed data. Transformation should be documented in a readme.
+- Week 2
+	+ Coding standards in R
+		- Always use files / text editor
+		- Indent your code (4 spaces)
+		- Limit line length (80 characters)
+		- Split up your functions
+	+ Markdown
+		- write/read in an easy format that automatically converts to XHTML
+		- # headings
+		- * italics, ** bold
+		- - unordered list
+		- (1, 2, 3) ordered list
+		- [links](http://url)
+		- newlines created with a double space at the end of the line
+		- can insert standalone html elements
+	+ R Markdown (.rmd)
+		- lets you embed R code within a markdown file
+		- R markdown can be converted to regular markdown with knitr
+		- Markdown is converted to HTML with the markdown package
+		- to write r code: ```{r nameoptional, echo = TRUE, results = "hide"}, close it with ```
+		- .rmd >> .md >> .html
+		- Inline text computations
+			+ The current time is `r time`. 
+			+ variables come from an earlier code chunk
+		- HTML embeds the full image using base64 code, resulting in a true stand-along html document
+		- xtable package can generate HTML tables for you
+		- Set global options by changing opts_chunk$set
+		- Useful options:
+			+ results: "asis", "hide"
+			+ echo: TRUE, FALSE
+			+ fig.height, fig.width
+		- Caching computations
+			+ cache=TRUE option will save the results to disk, and will load from cache until the data or code changes
+			+ dependencies aren't automatically checked
+		
+	+ knitr
+		- built into R Studio
+		- can export to PDF or HTML
+		- good for medium-length, more formatted documents
+			+ Manuals, tutorials, reports
+		- not good for very large documents, complex formatting, or documents with heavy computations
+		
+		
+	+ knitr
