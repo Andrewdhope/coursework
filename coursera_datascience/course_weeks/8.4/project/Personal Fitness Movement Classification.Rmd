@@ -1,0 +1,211 @@
+---
+title: "Personal Fitness Movement Classification"
+author: "Andrew Hope"
+date: "May 16, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Summary
+
+This analysis works with data collected from personal fitness trackers. The data contains sensor readings taken on a set of subjects as they perform various movements. Each subject-movement combination produces dozens of data points, captured at regular intervals during the execution of their movement.
+
+The objective of this analysis is to use the data captured by the sensors to build a classification model. The model should be able to predict the way in which the subject performs the movement. The movements in the data set are classified using the 'classe' variable. The model will predict the 'classe' of a reading given a set of sensor variables
+
+## Preliminary Setup
+This analysis relies the caret package.
+```{r packages, warning=FALSE}
+    library(caret)
+```
+
+## Exploratory Analysis
+### Data Load
+The training dataset for this analysis is available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The testing dataset for this analysis is available here:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+```{r load, cache = TRUE}
+df.load.train <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+
+df.load.test <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```
+Re-name our primary training data set to something more convenient.
+```{r}
+df <- df.load.train
+```
+
+### View Data
+```{r view}
+dim(df)
+table(sapply(df, class))
+str(df)
+```
+
+### Partition Training Data
+
+The training dataset provides 19622 observations. I partitioned roughly 10% of this dataset for the purposes of validation. I used this validation set for initial evalutation of models trained on the 90% of remaining training data. After this initial validation, I selected the preferred model, tuned its parameters, and performed a final validation using the proper testing data set.
+
+Looking at the data, I noticed that the observations are grouped into sets, corresponding to the num_window variable. I assume that these sets are important to keep intact when creating the validation data set. The structure of the validation data set should resemble the structure of the training set. To maintain that structure, the validation data set consists or roughly 10% of all unique num_window values.
+
+```{r partition}
+
+# generate length(unique(df$num_window))/10 uniform random numbers
+m <- length(unique(df$num_window))
+n <- round(m / 10)
+
+set.seed(8)
+valset <- round(runif(n, min = 1, max = m))
+valset <- unique(valset)
+
+df.val <- subset(df, df$num_window %in% valset)
+df.train <- subset(df, !(df$num_window %in% valset))
+```
+
+## Feature Selection
+
+The original dataset includes 160 variables. It is necessary to trim this to a smaller set of features so our models can train in a reasonable amount of time. Lacking subject area expertise, I relied on characteristics of the data to determine which variables to keep and which to discard.
+
+Many of the variables are either null or NA for most observations. 
+
+```{r}
+    table(colSums(is.na(df.train)))
+    table(colSums(df.train == ""))
+    nrow(df.train)
+```
+
+The first table shows that 67 variables have NA values in ~98% of observations. The second table shows 33 additional variables have null values in ~98% of observations.
+
+I removed these variables from the dataset because variables with a large majority of null values are not useful for this classification.
+
+```{r features}
+    # begin by saving off the original dataset
+    df.orig <- df.train
+    
+    # remove columns that are mostly na
+    df.train <- df.train[, colSums(is.na(df.train)) == 0] # df now only includes complete columns
+    
+    # save off the removed columns
+    df.removed.na <- df.orig[, colSums(is.na(df.orig)) > 0]
+    
+    # can get rid of another 33 by doing the same thing with a null check
+    dim(df.train[, colSums(df.train == "") > 0])
+    
+    # save off the removed colunms
+    df.removed.null <- df.train[, colSums(df.train == "") > 0]
+    
+    # remove columns that are mostly null
+    df.train <- df.train[, colSums(df.train == "") == 0]
+```
+
+Another set of features to remove are all variables containing meta-data on the trial itself, as opposed to values measured by the sensors within a trial. These meta-features are contained in the first seven columns in the data set.
+
+```{r}
+    names(df.train[,1:7])
+```
+
+```{r index}
+    df.train <- df.train[, -c(1:7)]
+```
+
+```{r dim}
+    dim(df.train)
+```
+
+The training data set now has 53 variables, which will all be included as potential features for the model. 
+
+## Algorithm Evaluation
+
+The question in this analysis calls for a classification model. For this analysis I selected three common classification algorithms as candidtates for the final model. I ran the three models with default settings and observed if one would clearly outperform the others. I observed that a random forest did indeed outperform both gradient boosting and naive bayes.
+
+### Gradient Boosting
+```{r fit.gbm, cache = TRUE}
+    fit.gbm <- train(classe ~ ., data = df.train, method = "gbm", verbose = FALSE)
+    fit.gbm
+```
+Observe the accuracy of the prediction on the validation data set.
+```{r pred.gbm, cache = TRUE}
+    pred.gbm <- predict(fit.gbm, df.val)
+    sum(pred.gbm == df.val$classe)/length(df.val$classe)
+```
+
+### Naive Bayes
+
+The Naive Bayes model completes its training relatively quickly. However, it could not successfully compile into this R-markdown document. Its code has been commented out, but the model is reproducible and its results are written below.
+
+```{r fit.nb, cache = TRUE}
+    # fit.nb <- train(classe ~ ., data = df.train, method = "nb") # ~30 minutes
+```
+Observe the accuracy of the prediction on the validation data set.
+```{r pred.nb, cache = TRUE}
+    # pred.nb <- predict(fit.nb, df.val)
+    # sum(pred.nb == df.val$classe)/length(df.val$classe)
+    print(0.06747496)
+```
+
+### Random Forest
+```{r fit.rf, cache = TRUE}
+    fit.rf <- train(classe ~ ., data = df.train, method = "rf", verbose = FALSE) 
+    fit.rf
+```
+Observe the accuracy of the prediction on the validation data set.
+```{r pred.rf, cache = TRUE}
+    pred.rf <- predict(fit.rf, df.val)
+    sum(pred.rf == df.val$classe)/length(df.val$classe)
+```
+
+## Model Tuning
+
+The random forest model produces the most accurate results on both the training and validation data sets. I experimented with two variations to the model to attempt to significantly increase the model's accuracy on the validation data set.
+
+### Cross Validation Method
+By default, the random forest method uses a boosting-style cross validatoin, where each sample is of equal size to the original data set, drawn with replacement. As an alternative, I modified the method to use a 10-fold cross validation.
+```{r fit.rf2, cache = TRUE}
+    fit.rf2 <- train(classe ~ ., data = df.train, method = "rf", verbose = FALSE, trControl = trainControl(method = "cv", number = 10))
+    fit.rf2
+```
+
+The results came very close to the first version of the model.
+```{r pred.rf2, cache = TRUE}
+    pred.rf2 <- predict(fit.rf2, df.val)
+    sum(pred.rf2 == df.val$classe)/length(df.val$classe)
+``` 
+
+### Change mtry Parameter
+
+The mtry tuning parameter defines how many variables are randomly selected at each branch in the random forest. By default, the random forest method executes using three different mtry values and selects a model from the most successful setting. The most successful mtry value was 27 for the previous random forest models in this analysis. 
+
+I trained the model a set of values close to 27 (20, 25, 30, 35), to see if the model's results would yield significant improvements with values around 27 in either direction.
+
+```{r fit.rf3, cache = TRUE}
+    fit.rf3 <- train(classe ~ ., data = df.train, method = "rf", verbose = FALSE, trControl = trainControl(method = "cv", number = 10, search = "grid"), tuneGrid = expand.grid(.mtry=c(20, 25, 30, 35)))
+    fit.rf3
+```
+
+```{r pred.rf3, cache = TRUE}
+    pred.rf3 <- predict(fit.rf3, df.val)
+    sum(pred.rf3 == df.val$classe)/length(df.val$classe)
+```
+
+## Evaluation
+
+In this section I planned to evaluate the final model against the testing data set. However, in this exercise the testing data set does not include the classe variable. 
+
+The expected out-of-sample accuracy of the RF2 model is 94%. This comes from the test against the validation data set, rounded down toward the lower end of its confidence interval.
+
+```{r evaluate}
+    conf <- confusionMatrix(pred.rf2, df.val$classe)
+    conf$overall[3]
+```
+
+## Conclusion
+
+Compared to gradient boosting and naive bayes, the random forest models provide the lowest prediction error against both the training and testing data set. Changing the cross validation method and changing the mtry tuning parameter did not make a large impact on the model's accuracy. 
+
+This analysis recommends using the RF2 model constructed above. This is the random forest model with a 10-fold cross validation, with a default mtry selection of 27. This model yields slightly less accurate predictions than an RF model using all default values, but it uses a more interpretable cross validation method. 
