@@ -1,0 +1,61 @@
+---
+title: "Regression Model for MPG"
+author: "Andrew Hope"
+date: "April 26, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+
+This analysis aims to quantify the difference in miles per gallon (MPG) that will result from a car being equipped with an automatic transmission vs. a manual transmission. The analysis uses an ordinary linear regression, and concludes that the type of transmission does have a significant effect on MPG.
+
+## Load Data and Packages
+```{r load}
+library(ggplot2)
+df <- mtcars
+```
+
+## Exploratory Analysis
+```{r explore}
+dim(df)
+head(df)
+```
+
+The 'am' variable indicates the transmission (0 = automatic, 1 = manual).  
+
+```{r}
+table(df$am)
+```
+
+## Model Generation
+```{r lm}
+fit <- lm(mpg ~ am, data = df)
+summary(fit)
+```  
+
+This model tells us that the mean MPG for an automatic transmission is 17.147, and the mean MPG for a manual increases by 7.245 (to a total of 24.392). 
+
+## Residual Analysis
+```{r residuals}
+qplot(fit$residuals, df$am, ylab = "Transmission (1 for manual)", xlab = "Residual")
+```  
+
+This residual plot shows values evenly distributed around 0. It appears that the variance of residuals is larger when am == 1. This difference is noticable but not dramatic.  
+
+``` {r quantiles}
+qqnorm(fit$residuals)
+qqline(fit$residuals)
+```  
+
+A Q-Q plot of the residuals shows that residual values do not deviate from a normal distribution in a clear and systematic way. The residuals appear to be approximately normal.
+
+## Explanation of Uncertainty
+The model's coefficient has a p-value of 0.000285, which is low enough to conclude that the transmission variable has a non-zero effect on MPG. However, the r-squared and residual standard error indicate that using the transmission variable as the only predictor will not provide an especially precise estimate of MPG.  
+
+The adjusted r-squared value is 0.3385, meaning 33% of the variability of MPG is explained by the transmission variable. There is significant variablility outside of the transmission variable that should be investigated.  
+
+The residual standard error is 4.9. This is low enough to confirm that the model outperforms a null hypothesis, but it would be reasonable to continue the analysis to look for a model with a lower residual standard error.  

@@ -1,0 +1,99 @@
+---
+title: "Inference Analysis"
+author: "Andrew Hope"
+date: "April 6, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Inference Analysis Comparing Partitioned Data
+## Overview
+This analysis aims to determine if there is a significant difference in mean tooth length based on two different variables. The analysis will first describe the dataset, and will then use an independent two-sample t-test to look for significant differences between subset means. The anlysis will use an alpha value of 0.5, and it assumes that the samples were taken randomly from a population with an approximately normal distribution.
+
+## Load Data
+Load in the ToothGrowth dataset from the R dataset library.
+```{r}
+    library(datasets)
+    tg <- ToothGrowth
+```
+## Exploratory Analysis and Transformations
+Use some basic exploratory techniques to understand this small dataset.
+```{r}
+    dim(tg)
+    summary(tg)
+```
+The quartiles for the dose column are a bit unusual in the summary. They are multiples of 0.5. Explore this further.
+```{r}
+    unique(tg$dose)
+```
+This variable should be a factor rather than numeric. Perform this transformation.
+```{r}
+    tg$dose <- as.factor(tg$dose)
+    summary(tg)
+```
+## Calculate Statistics
+Split the data by supp and dose.
+```{r}
+    supp <- split(tg$len, tg$supp)
+    dose <- split(tg$len, tg$dose)
+```
+Calculate the mean, variance, and standard deviation for each value of supp. 
+```{r}
+    ms <- tapply(tg$len, tg$supp, mean)
+    vs <- tapply(tg$len, tg$supp, var)
+    ms
+    vs
+    sqrt(vs)
+```
+Do the same with dose.
+```{r}
+    md <- tapply(tg$len, tg$dose, mean)
+    vd <- tapply(tg$len, tg$dose, var)
+    md
+    vd
+    sqrt(vd)
+```
+## Compare Mean of Partitions
+Compare the means (grouped by supp) using a 95% confidence interval and an independent two-tailed t-test.
+
+```{r}
+supp.t <- t.test(supp$OJ, supp$VC, conf.level = 0.95)
+supp.t
+```
+
+For dose, execute an independent two-sample t-test between each factor level. This will result in three comparisons: 0.5 and 1, 0.5 and 2, and 1 and 2.  
+
+First comparison -- factor level 0.5 to 1.
+```{r}
+dose.t12 <- t.test(dose$`0.5`, dose$`1`, conf.level = 0.95)
+dose.t12
+```
+
+Second comparison -- factor level 0.5 to 2.
+```{r}
+dose.t13 <- t.test(dose$`0.5`, dose$`2`, conf.level = 0.95)
+dose.t13
+```
+
+Third comparison -- factor level 1 to 2.
+```{r}
+dose.t23 <- t.test(dose$`1`, dose$`2`, conf.level = 0.95)
+dose.t23
+```
+
+## Conclusions
+For the supp variable, using a 95% confidence interval does not allow us to reject a null hypothesis. The two groups do not have significantly different means. This is indicated by the confidence interval containing zero, and also the p-value being greater than our accepted alpha of 0.5. 
+```{r}
+    supp.t$conf.int
+    supp.t$p.value
+```
+For the dose variable, each comparison gave a confidence interval that did not include zero. This indicates that the groups have significantly different means. For all three comparisons, the p-value is less than 0.5, allowing us to comfortably reject the null hypothesis.
+```{r}
+    dose.t12$p.value
+    dose.t13$p.value
+    dose.t23$p.value
+```

@@ -1,0 +1,469 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Inference Analysis},
+            pdfauthor={Andrew Hope},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Inference Analysis}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Andrew Hope}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{April 6, 2018}
+
+
+\begin{document}
+\maketitle
+
+\section{Inference Analysis Comparing Partitioned
+Data}\label{inference-analysis-comparing-partitioned-data}
+
+\subsection{Overview}\label{overview}
+
+This analysis aims to determine if there is a significant difference in
+mean tooth length based on two different variables. The analysis will
+first describe the dataset, and will then use an independent two-sample
+t-test to look for significant differences between subset means. The
+anlysis will use an alpha value of 0.5, and it assumes that the samples
+were taken randomly from a population with an approximately normal
+distribution.
+
+\subsection{Load Data}\label{load-data}
+
+Load in the ToothGrowth dataset from the R dataset library.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{library}\NormalTok{(datasets)}
+    \NormalTok{tg <-}\StringTok{ }\NormalTok{ToothGrowth}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Exploratory Analysis and
+Transformations}\label{exploratory-analysis-and-transformations}
+
+Use some basic exploratory techniques to understand this small dataset.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{dim}\NormalTok{(tg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 60  3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{summary}\NormalTok{(tg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       len        supp         dose      
+##  Min.   : 4.20   OJ:30   Min.   :0.500  
+##  1st Qu.:13.07   VC:30   1st Qu.:0.500  
+##  Median :19.25           Median :1.000  
+##  Mean   :18.81           Mean   :1.167  
+##  3rd Qu.:25.27           3rd Qu.:2.000  
+##  Max.   :33.90           Max.   :2.000
+\end{verbatim}
+
+The quartiles for the dose column are a bit unusual in the summary. They
+are multiples of 0.5. Explore this further.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{unique}\NormalTok{(tg$dose)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.5 1.0 2.0
+\end{verbatim}
+
+This variable should be a factor rather than numeric. Perform this
+transformation.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{tg$dose <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(tg$dose)}
+    \KeywordTok{summary}\NormalTok{(tg)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       len        supp     dose   
+##  Min.   : 4.20   OJ:30   0.5:20  
+##  1st Qu.:13.07   VC:30   1  :20  
+##  Median :19.25           2  :20  
+##  Mean   :18.81                   
+##  3rd Qu.:25.27                   
+##  Max.   :33.90
+\end{verbatim}
+
+\subsection{Calculate Statistics}\label{calculate-statistics}
+
+Split the data by supp and dose.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{supp <-}\StringTok{ }\KeywordTok{split}\NormalTok{(tg$len, tg$supp)}
+    \NormalTok{dose <-}\StringTok{ }\KeywordTok{split}\NormalTok{(tg$len, tg$dose)}
+\end{Highlighting}
+\end{Shaded}
+
+Calculate the mean, variance, and standard deviation for each value of
+supp.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{ms <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(tg$len, tg$supp, mean)}
+    \NormalTok{vs <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(tg$len, tg$supp, var)}
+    \NormalTok{ms}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       OJ       VC 
+## 20.66333 16.96333
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{vs}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       OJ       VC 
+## 43.63344 68.32723
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{sqrt}\NormalTok{(vs)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##       OJ       VC 
+## 6.605561 8.266029
+\end{verbatim}
+
+Do the same with dose.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{md <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(tg$len, tg$dose, mean)}
+    \NormalTok{vd <-}\StringTok{ }\KeywordTok{tapply}\NormalTok{(tg$len, tg$dose, var)}
+    \NormalTok{md}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    0.5      1      2 
+## 10.605 19.735 26.100
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{vd}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      0.5        1        2 
+## 20.24787 19.49608 14.24421
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \KeywordTok{sqrt}\NormalTok{(vd)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      0.5        1        2 
+## 4.499763 4.415436 3.774150
+\end{verbatim}
+
+\subsection{Compare Mean of
+Partitions}\label{compare-mean-of-partitions}
+
+Compare the means (grouped by supp) using a 95\% confidence interval and
+an independent two-tailed t-test.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{supp.t <-}\StringTok{ }\KeywordTok{t.test}\NormalTok{(supp$OJ, supp$VC, }\DataTypeTok{conf.level =} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{supp.t}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Welch Two Sample t-test
+## 
+## data:  supp$OJ and supp$VC
+## t = 1.9153, df = 55.309, p-value = 0.06063
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.1710156  7.5710156
+## sample estimates:
+## mean of x mean of y 
+##  20.66333  16.96333
+\end{verbatim}
+
+For dose, execute an independent two-sample t-test between each factor
+level. This will result in three comparisons: 0.5 and 1, 0.5 and 2, and
+1 and 2.
+
+First comparison -- factor level 0.5 to 1.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dose.t12 <-}\StringTok{ }\KeywordTok{t.test}\NormalTok{(dose$}\StringTok{`}\DataTypeTok{0.5}\StringTok{`}\NormalTok{, dose$}\StringTok{`}\DataTypeTok{1}\StringTok{`}\NormalTok{, }\DataTypeTok{conf.level =} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{dose.t12}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Welch Two Sample t-test
+## 
+## data:  dose$`0.5` and dose$`1`
+## t = -6.4766, df = 37.986, p-value = 1.268e-07
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -11.983781  -6.276219
+## sample estimates:
+## mean of x mean of y 
+##    10.605    19.735
+\end{verbatim}
+
+Second comparison -- factor level 0.5 to 2.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dose.t13 <-}\StringTok{ }\KeywordTok{t.test}\NormalTok{(dose$}\StringTok{`}\DataTypeTok{0.5}\StringTok{`}\NormalTok{, dose$}\StringTok{`}\DataTypeTok{2}\StringTok{`}\NormalTok{, }\DataTypeTok{conf.level =} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{dose.t13}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Welch Two Sample t-test
+## 
+## data:  dose$`0.5` and dose$`2`
+## t = -11.799, df = 36.883, p-value = 4.398e-14
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -18.15617 -12.83383
+## sample estimates:
+## mean of x mean of y 
+##    10.605    26.100
+\end{verbatim}
+
+Third comparison -- factor level 1 to 2.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{dose.t23 <-}\StringTok{ }\KeywordTok{t.test}\NormalTok{(dose$}\StringTok{`}\DataTypeTok{1}\StringTok{`}\NormalTok{, dose$}\StringTok{`}\DataTypeTok{2}\StringTok{`}\NormalTok{, }\DataTypeTok{conf.level =} \FloatTok{0.95}\NormalTok{)}
+\NormalTok{dose.t23}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Welch Two Sample t-test
+## 
+## data:  dose$`1` and dose$`2`
+## t = -4.9005, df = 37.101, p-value = 1.906e-05
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -8.996481 -3.733519
+## sample estimates:
+## mean of x mean of y 
+##    19.735    26.100
+\end{verbatim}
+
+\subsection{Conclusions}\label{conclusions}
+
+For the supp variable, using a 95\% confidence interval does not allow
+us to reject a null hypothesis. The two groups do not have significantly
+different means. This is indicated by the confidence interval containing
+zero, and also the p-value being greater than our accepted alpha of 0.5.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{supp.t$conf.int}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] -0.1710156  7.5710156
+## attr(,"conf.level")
+## [1] 0.95
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{supp.t$p.value}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.06063451
+\end{verbatim}
+
+For the dose variable, each comparison gave a confidence interval that
+did not include zero. This indicates that the groups have significantly
+different means. For all three comparisons, the p-value is less than
+0.5, allowing us to comfortably reject the null hypothesis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{dose.t12$p.value}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.268301e-07
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{dose.t13$p.value}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4.397525e-14
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+    \NormalTok{dose.t23$p.value}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.90643e-05
+\end{verbatim}
+
+
+\end{document}

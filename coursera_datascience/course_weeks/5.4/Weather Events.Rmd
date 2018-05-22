@@ -1,0 +1,336 @@
+---
+title: "Damage Analysis of U.S. Weather Events"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Synopsis
+The goal of this analysis is to answer two questions related to the degree of damage caused by weather events in the United States.  
+
+First, which types of events are most harmful with respect to population health?  
+Second, which types of events have the greatest economic consequences?  
+
+To answer these questions, I analyzed a public dataset from the U.S. National Oceanic and Atmospheric Administration's storm database.  
+
+This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, property damage, and crop damage.  
+
+The product of this analysis is a list of the most damaging weather events evaluated by fatalities, injuries, estimated property damage, and estimated crop damage.  
+
+
+All meaningful analysis is described below, as a set of instructions that can be used to reproduce the results.
+
+
+## Data Processing
+Download the publically available dataset: https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2  
+Save the file in the working directory in a 'data' subdirectory.  
+```{r download, cache = TRUE}
+download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "./data/repdata data StormData.csv.bz2")
+```
+
+Read the file into a dataframe.
+
+```{r read, cache = TRUE}
+df <- read.csv("./data/repdata data Stormdata.csv.bz2", header = TRUE)
+```
+
+
+Determine the structure of the variables, and select the relevant variables to use in the analysis.
+
+```{r}
+str(df)
+```
+
+Most of the variables are explained by their titles.  
+
+Use unique() to get a list of unique values for a single variable. This helps to clarify data when the title is difficult to decipher.  
+
+Event types are stored in the EVTYPE variable. There are 985 unique values. Look at a sample of 50 to get a sense for the data.  
+```{r}
+length(unique(df$EVTYPE))
+head(unique(df$EVTYPE), 50)
+```
+
+Two variables relate directly to population health: FATALITIES and INJURIES.
+
+```{r}
+class(df$FATALITIES)
+range(df$FATALITIES)
+class(df$INJURIES)
+range(df$INJURIES)
+```
+
+
+Four variables relate directly to economic impact: PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP  
+
+
+Check to see if there are any NA values in any of the columns of interest. Do so using complete.cases() on a subset of columns. Then convert the logical vector into numeric values (negated, so 0 is for complete, 1 for incomplete), and sum the results. A sum of 0 indicates no incomplete cases.  
+```{r}
+sum(as.numeric(!complete.cases(df[,c("FATALITIES","INJURIES","PROPDMG","CROPDMG","PROPDMGEXP","CROPDMGEXP","EVTYPE")])))
+```
+
+All cases are complete. No need to worry about NAs in calculations (yet). Continue to explore the column variables.
+
+PROPDMG and CROPDMG are numeric variables.
+
+```{r}
+class(df$PROPDMG)
+range(df$PROPDMG)
+class(df$CROPDMG)
+range(df$CROPDMG)
+```
+
+PROPDMGEXP and CROPDMGEXP are factor variables.  
+
+```{r}
+class(df$PROPDMGEXP)
+class(df$CROPDMGEXP)
+```
+
+Use unique() to see the factor levels in use for PROPDMGEXP and CROPDMGEXP.  
+
+```{r}
+unique(df$PROPDMGEXP)
+unique(df$CROPDMGEXP)
+```
+
+The factor levels are similar for PROPDMGEXP and CROPDMGEXP. The factor levels of CROPDMGEXP are a subset of the factor levels of PROPDMGEXP. 
+
+There is not a clear explanation on how to interpret these factor variables. This analysis ASSUMES that EXP stands for exponent, and these are meant to act as multipliers to the PROPDMG and CROPDMG columns.  
+
+The letters: H, K, M, and B, are assumed to stand for hundred, thousand, million, and billion.  
+
+The non-alphanumeric symbols are more difficult to interpret. This analysis assumes that the ?, +, -, and " " values in the PROPDMGEXP and CROPDMGEXP columns indicate no exponential multiplier. These will set the exponent to 0 in our analysis.  
+
+### Data processing for property damage.  
+
+This analysis focuses on the most damaging events. Remove rows with zero-values for the sake of performance.  
+
+```{r}
+    nzdf.p <- subset(df, df$PROPDMG > 0)
+```
+
+Create a new column called PROPDMGMULT. Multiply the PROPDMG column by the adjusted exponential in the PROPDMGEXP column and save it to PROPDMGMULT.  
+
+```{r propdmgmult, cache = TRUE}
+nzdf.p$PROPDMGMULT = 0
+for (i in seq(length(nzdf.p$REFNUM))) {
+        if (is.numeric(nzdf.p[i, "PROPDMGEXP"]) == FALSE) {
+            nzdf.p[i, "PROPDMGEXP"] = 0   
+        }
+        else if (toupper(nzdf.p[i, "PROPDMGEXP"]) == "H") {
+            nzdf.p[i, "PROPDMGEXP"] = 2    
+        }
+        else if (toupper(nzdf.p[i, "PROPDMGEXP"]) == "K") {
+            nzdf.p[i, "PROPDMGEXP"] = 3    
+        }
+        else if (toupper(nzdf.p[i, "PROPDMGEXP"]) == "M") {
+            nzdf.p[i, "PROPDMGEXP"] = 6    
+        }
+        else if (toupper(nzdf.p[i, "PROPDMGEXP"]) == "B") {
+            nzdf.p[i, "PROPDMGEXP"] = 9    
+        }
+        nzdf.p[i, "PROPDMGMULT"] = nzdf.p[i, "PROPDMG"] * 10^as.numeric(as.character(nzdf.p[i, "PROPDMGEXP"]))
+    }
+```
+
+Sum the total damage per event, measured by propery damage.  
+``` {r}
+    totals.p <- tapply(nzdf.p$PROPDMGMULT, nzdf.p$EVTYPE, sum)
+```
+
+Check for NAs in this totals list.
+```{r}
+    length(totals.p[is.na(totals.p)])
+
+```
+
+NAs exist even though there were no incomplete cases in the dataframe. This is because the EVTYPE column is a factor variable that kept all 985 levels from the original dataset. tapply() attempts to sum over all of the factor levels, but many of them no longer have associated values in the current subset.  
+
+Remove NAs.
+```{r}
+    full_totals.p <- totals.p[!is.na(totals.p)]
+```
+
+Order the totals.
+```{r order_totals.p, cache = TRUE}
+ordered_totals.p <- sort(full_totals.p, decreasing = TRUE)
+```
+
+### Data processing for crop damage.  
+
+This analysis focuses on the most damaging events. Remove rows with zero-values for the sake of performance.  
+
+```{r}
+    nzdf.c <- subset(df, df$CROPDMG > 0)
+```
+
+Create a new column called CROPDMGMULT. Multiply the CROPDMG column by the adjusted exponential in the CPROPDMGEXP column and save it to CPROPDMGMULT.  
+
+```{r cropdmgmult, cache = TRUE}
+nzdf.c$CROPDMGMULT = 0
+for (i in seq(length(nzdf.c$REFNUM))) {
+        if (is.numeric(nzdf.c[i, "CROPDMGEXP"]) == FALSE) {
+            nzdf.c[i, "CROPDMGEXP"] = 0   
+        }
+        else if (toupper(nzdf.c[i, "CROPDMGEXP"]) == "H") {
+            nzdf.c[i, "CROPDMGEXP"] = 2    
+        }
+        else if (toupper(nzdf.c[i, "CROPDMGEXP"]) == "K") {
+            nzdf.c[i, "CROPDMGEXP"] = 3    
+        }
+        else if (toupper(nzdf.c[i, "CROPDMGEXP"]) == "M") {
+            nzdf.c[i, "CROPDMGEXP"] = 6    
+        }
+        else if (toupper(nzdf.c[i, "CROPDMGEXP"]) == "B") {
+            nzdf.c[i, "CROPDMGEXP"] = 9    
+        }
+        nzdf.c[i, "CROPDMGMULT"] = nzdf.c[i, "CROPDMG"] * 10^as.numeric(as.character(nzdf.c[i, "CROPDMGEXP"]))
+    }
+```
+
+Sum the total damage per event, measured by crop damage.  
+``` {r}
+    totals.c <- tapply(nzdf.c$CROPDMGMULT, nzdf.c$EVTYPE, sum)
+```
+
+Check for NAs in this totals list. 
+```{r}
+    length(totals.c[is.na(totals.c)])
+
+```
+
+NAs exist even though there were no incomplete cases in the dataframe. This is because the EVTYPE column is a factor variable that kept all 985 levels from the original dataset. tapply() attempts to sum over all of the factor levels, but many of them no longer have associated values in the current subset.  
+
+Remove NAs.
+```{r}
+    full_totals.c <- totals.c[!is.na(totals.c)]
+```
+
+Order the totals.
+```{r order_totals.c, cache = TRUE}
+ordered_totals.c <- sort(full_totals.c, decreasing = TRUE)
+```
+
+
+### Data processing for fatalities.
+
+This analysis focuses on the most damaging events. Remove rows with zero-values for the sake of performance.  
+
+```{r}
+    nzdf.f <- subset(df, df$FATALITIES > 0)
+```
+
+Sum the total damage per event, measured by fatalities.  
+``` {r}
+    totals.f <- tapply(nzdf.f$FATALITIES, nzdf.f$EVTYPE, sum)
+```
+
+Check for NAs in this totals list.
+```{r}
+    length(totals.f[is.na(totals.f)])
+
+```
+
+NAs exist even though there were no incomplete cases in the dataframe. This is because the EVTYPE column is a factor variable that kept all 985 levels from the original dataset. tapply() attempts to sum over all of the factor levels, but many of them no longer have associated values in the current subset.  
+
+Remove NAs.
+```{r}
+    full_totals.f <- totals.f[!is.na(totals.f)]
+```
+
+Order the totals.
+```{r order_totals.f, cache = TRUE}
+ordered_totals.f <- sort(full_totals.f, decreasing = TRUE)
+```
+
+### Data processing for injuries.
+
+This analysis focuses on the most damaging events. Remove rows with zero-values for the sake of performance.  
+
+```{r}
+    nzdf.i <- subset(df, df$INJURIES > 0)
+```
+
+Sum the total damage per event, measured by injuries.  
+``` {r}
+    totals.i <- tapply(nzdf.i$INJURIES, nzdf.i$EVTYPE, sum)
+```
+
+Check for NAs in this totals list.
+```{r}
+    length(totals.i[is.na(totals.i)])
+
+```
+
+NAs exist even though there were no incomplete cases in the dataframe. This is because the EVTYPE column is a factor variable that kept all 985 levels from the original dataset. tapply() attempts to sum over all of the factor levels, but many of them no longer have associated values in the current subset.  
+
+Remove NAs.
+```{r}
+    full_totals.i <- totals.i[!is.na(totals.i)]
+```
+
+Order the totals.
+```{r order_totals.i, cache = TRUE}
+ordered_totals.i <- sort(full_totals.i, decreasing = TRUE)
+```
+
+### Prepare cost data for a plot.
+
+This analysis assumes that estimated property and cost data are measured with the same units (US Dollars), which allows them to be  evaluated on a single plot.
+
+So far, this analysis has created top ten lists for cost estimates.
+
+Here are the top ten lists written out.
+```{r}
+    ordered_totals.p[1:10] # property
+    ordered_totals.c[1:10] # crop
+```
+
+Some events appear on both lists. In order to find the most damaging events, select the events that appear on both lists and observe their estimated costs. The intersect() function builds a list of entries that appear on both lists.
+
+```{r intersect}
+# Use names() to find the names of the events that appear on both lists
+inter <- intersect(names(ordered_totals.p[1:10]), names(ordered_totals.c[1:10]))
+```
+
+Create a sum of estimated property and crop cost for events that appear on both top ten lists.
+```{r combine}
+combined <- ordered_totals.p[inter] + ordered_totals.c[inter]
+```
+
+The data will be plotted in the Results section.
+
+## Results
+
+### Top ten most damaging event types measured by fatalities and injuries.
+
+```{r results.f}
+    par(mar = c(11, 4, 4, 2))
+    barplot(unlist(ordered_totals.f[1:10]), las = 2, main = "Fatalities")
+```
+
+```{r results.i}
+    par(mar = c(11, 4, 4, 2))
+    barplot(unlist(ordered_totals.i[1:10]), las = 2, main = "Injuries")
+```
+
+Here are the lists written out.
+```{r}
+    ordered_totals.f[1:10] # fatalities
+    ordered_totals.i[1:10] # injuries
+```
+
+### Top ten most damaging event types measured by property damage and crop damage.
+```{r results.cost}
+par(mar = c(11, 6, 4, 0))
+barplot(unlist(combined), las = 2, main = "Cost of Property and Crop Damage")
+barplot(unlist(ordered_totals.p[inter]), las = 2, col = "navy", add = T)
+barplot(unlist(ordered_totals.c[inter]), las = 2, col = "gold", add = T)
+legend("topright", legend = c("Property", "Crop", "Total"), fill = c("navy", "gold", "gray"))
+```
+
+The results show the property damage, crop damage, and their sum.
+

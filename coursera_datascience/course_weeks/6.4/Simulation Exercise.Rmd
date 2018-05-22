@@ -1,0 +1,80 @@
+---
+title: "Inference Analysis"
+author: "Andrew Hope"
+date: "April 6, 2018"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Inference Analysis With an Exponential Distribution
+## Overview
+This analysis will demonstrate inferential statistics techniques to evaluate sampling mean and variance for a large sample with an underlying exponential distribution. The analysis will begin by creating a simulated dataset, and will then calculate and compare  sampling statistics. A final section provides plots to better convey the conclusions. 
+```{r}
+library(ggplot2)
+```
+## Simulations
+Create a set of 1000 random samples from an exponential distribution with lambda equal to 0.2. Each sample has a size n = 40. Begin by generating all of the needed data points. In this analysis we round the number to 4 decimal places for the sake of keeping the data simpler and cleaner.
+```{r generate}
+r <- round(rexp(40000, rate = 0.2), 4)
+```
+Move the values into a matrix to create 1000 samples of size n = 40.
+```{r matrix}
+rmat <- matrix(r, 1000, 40)
+head(rmat, 3)
+```
+## Sample Mean vs. Theoretical Mean
+Find the mean for each of the 1000 rows, and take the mean of means to find the sampling mean.
+```{r means}
+sampling <- apply(rmat, 1, mean)
+m <- mean(sampling)
+m
+```
+The Central Limit Theorm allows us to conclude that this sampling mean is approximately equal to the theoretical mean. 
+
+The theoretical mean of an exponential distribution is equal to 1/lambda. 
+```{r}
+1/0.2
+```
+Indeed, our sampling mean is very close to the theoretical mean.  
+
+## Sample Variance vs. Thoretical Variance  
+Calculate the population variance.  
+```{r}
+r.var <- var(r)
+r.var
+```
+This should be close to the theoretical variance of an exponential distribution, which is equal to 1/lambda^2.
+```{r}
+1/0.2^2
+```
+Calculate the variance of the 1000 sample means to find the sampling variance.
+```{r var}
+v <- var(sampling)
+v
+```
+This variance of the sample means should be approximately equal to its theoretical equivalent, (1/lambda^2)/n
+```{r}
+(1/0.2^2)/40
+```
+## Distribution
+There is a significant difference between the distribution of an exponential random variable, and the distribution of means of a set of samples of exponential random variables.  
+
+First, look at a distribution of a single exponential random variable.
+
+```{r}
+qplot(r, bins = 30)
+```
+
+Now, look at the distribution of the 1000 mean values from the simulated data set.
+
+```{r}
+qplot(sampling, bins = 30)
+```
+
+This demonstrates the Central Limit Threorem. The distribution of a sample's statistic, across a set of samples, will resemble a normal distribution.
