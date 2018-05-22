@@ -322,7 +322,8 @@ df.train &lt;- subset(df, !(df$num_window %in% valset))</code></pre>
 </div>
 <div id="algorithm-evaluation" class="section level2">
 <h2>Algorithm Evaluation</h2>
-<p>The question in this analysis calls for a classification model. For this analysis I selected three common classification algorithms as candidtates for the final model. I ran the three models with default settings and observed if one would clearly outperform the others. I observed that a random forest did indeed outperform both gradient boosting and naive bayes.</p>
+<p>The question in this analysis calls for a classification model. For this analysis I selected three common classification algorithms as candidtates for the final model. For each, I calculated the accuracy of predictions against the validation data set. This provides an expected out of sample error for each mdoel.</p>
+<p>I ran the three models with default settings and observed if one would clearly outperform the others. I observed that a random forest did indeed outperform both gradient boosting and naive bayes.</p>
 <div id="gradient-boosting" class="section level3">
 <h3>Gradient Boosting</h3>
 <pre class="r"><code>    fit.gbm &lt;- train(classe ~ ., data = df.train, method = &quot;gbm&quot;, verbose = FALSE)
@@ -359,6 +360,7 @@ df.train &lt;- subset(df, !(df$num_window %in% valset))</code></pre>
 <pre class="r"><code>    pred.gbm &lt;- predict(fit.gbm, df.val)
     sum(pred.gbm == df.val$classe)/length(df.val$classe)</code></pre>
 <pre><code>## [1] 0.886136</code></pre>
+<p>While GBM delivers a very high in-sample accuracy, it seems to have overfit and does not perform as well against the validation data.</p>
 </div>
 <div id="naive-bayes" class="section level3">
 <h3>Naive Bayes</h3>
