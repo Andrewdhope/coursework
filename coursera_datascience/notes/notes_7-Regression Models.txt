@@ -1,0 +1,329 @@
+Week 1
+	- Least Squares
+		+ Trying to find a line that minimizes the mean squared distances between the line and the data.
+		+ Example (using Galton parent-child data)
+			- lm(I(child - mean(child) ~ I(parent - mean(parent)) - 1, data = galton)
+				+ subtract the mean from each point in order to shift the scatter plot to center on the origin.
+				+ subtract 1 to "get rid of the intercept because we're talking about regression through the origin"
+					- The lm function treats ones as constants in the regression formula. So if you subtract one, you're telling lm to discard the constant term, and if you add one, you'll explicitly include the constant.
+			- given a set of centered x and y values (also valid to find slope for non-centered values)
+				+ beta1 <- sum(y.centered * x.centered) / sum(x.centered ^ 2)
+				+ sum{Yi - B*Xi} -- the regression through the origin formula above fits any regression of this form
+	- Linear Least Squares
+		+ Background
+			- Normalize variable:
+				+ Zi = (Xi - Xbar) / s
+				+ gives you the distance from the mean expressed by number of standard deviations
+			- Empirical Covariance (? - get more understanding here)
+				+ Given pairs of (X, Y)
+				+ Cov(X, Y) = (1 / n-1) * SUM{(Xi - Xbar)*(Yi - Ybar)} = (1 / n-1)*SUM{Xi*Yi - n*Xbar*Ybar}
+				+ Cor(X, Y) = Cov(X, Y) / (Sx*Sy)
+					- Sx and Sy are estimated standard deviation
+			- Correlation
+				+ Cor(X, Y) = Cor(Y, X)
+				+ -1 >= Cor(X, Y) >= 1
+				+ Cor(X, Y) = 1 or -1 only when X and Y fall perfectly on a positive or negative sloped line
+		+ select the intercept and slope that minimizes the expression: sum{Yi - (B0 + B1*Xi)}^2
+		+ minimizing sum of residuals
+		+ solution (for estimating B1 and B0 from empirical data): 
+			- B1 = Cor(Y,X)*(Sd(Y)/Sd(X))
+			- B0 = Ybar - B1*Xbar
+			- B1 has the units of Y/X (delta Y over delta X), B0 has the units of Y
+			- The line passes through (Xbar, Ybar)
+			- Reversing the two variables gives you Cor(Y,X)*(Sd(X)/Sd(Y))
+			- If you center the data, the slope remains the same
+			- If you normalize it, the standard deviations are both 1, so the slope is equal to the correlation
+		+ programming
+			- lm(y ~ x)
+			- coef(lm(y ~ x)) gives you just the coefficients
+			- g + geom_smooth(method = "lm", formula = y ~ x)
+		+ technical details
+	
+	- Regression to the mean
+		+ Given a normalized X and Y, the linear regression model, Y = B0 + B1*X, has a B0 = 0 and a B1 = Cor(Y, X)
+		+ That correlation can essentially measure the expected degree of regression to the mean.
+			- If there is no correlation, there will be full-on regression to the mean (you'd expect the next observation to be on the mean, no matter the value of its predictor)
+			- If there is higher correlation, the expectation follows the regression line, which will be more toward the mean, but not the actual mean
+			
+Week 2
+	
+	- Statistical linear regression
+		+ Yi =  B0 + B1*Xi + ei
+			- ei is iid standard normal
+		+ E[Yi | Xi = xi] = B0 + B1*xi = population mean
+		+ Var(Yi | Xi = xi) = population variance
+			- Variance around the regression line, not the variance of the Y values
+		- Intercept: E[Y | X = 0] = B0
+			+ often you don't want to find the intercept when X = 0, so you can shift the regression formula to find the intercept when X = a
+			+ B0` + B1(X - a) + ei, where B0` is (B0 + aB1)
+				- shift doesn't affect B1
+			+ fit(y ~ I(x - mean(x)), data = df)
+				- you need to just know to interpret the new intercept as the Y for mean X
+			+ common to set a = Xbar, so you're B0` is known to be Y at Xbar.
+		- Slope: 
+			+ B1 is the expected change in response per unit change in predictor
+			+ often want to change the slope by a factor of a, potentially to convert its units.
+			+ Yi = B0 + B1`*(Xi*a) + ei, where B1` is (B1/a)
+			+ fit(y ~ I(x*10)), data = df)
+				- need to just know that the new slope is converted
+		- predict(fit, newdata = data.frame(newvar = newx))	
+		
+	- Residuals
+		+ variation around the regression line (as opposed to variation around an axis)
+			- residual variation is not explained by the regression, while systematic variation is the (large) part that is explained.
+				+ residual variation + systematic (or model) variation = total variation
+				+ R^2 = % of variation explained by the model (model variation / total variation)
+					- Not the be-all end-all. Can be gamed by removing points or overfitting with model variables.
+				+ R is also defined as the sample correlation between predictor and outcome.
+		+ when viewing a plot of residuals along x, you should see a random distribution around 0.			
+		+ sigma^2 = 1/n(sum(ei^2))
+			- for small n, most use a correction and substitute n-2 for n.
+			- summary(fit)$sigma
+		+ Yi =  B0 + B1*Xi + ei, where ei is iid standard normal.
+		+ Yihat = B0 + B1*Xi
+		+ ei = Yi - Yihat
+		+ Properties:
+			- E[ei] = 0
+			- if an intercept is included, then the sum(ei) = 0
+		+ heteroskedasticity -- residuals increasing as x increases
+		
+		+ resid(fit)
+		
+		
+	- Inference in Regression
+		+ Recap:
+			- Yi =  B0 + B1*Xi + ei, with ei as iid standard normal
+			- B0 = Ybar - B1hat*Xbar
+			- B1 = Cor(X, Y)* (SdY / SdX) 
+				+ Also equal to Cov(X, Y) / Var(X) (?? - double check)
+		+ if ei is iid standard normal, then you can assume and apply normal and T distribution and hypothesis tests
+		+ The variability of the data's points around the regression line:
+			- (1/n-2)*sum(ei^2)
+			- sum of residuals divided by n-2 DoF.
+		+ Sum of squares of X:
+			- sum((Xi - Xbar)^2)
+		+ Var(B1hat) = ((1/n-2)*sum(ei^2))/ sum((Xi - Xbar)^2)
+			- if x's are clustered, it is going to be hard to draw an accurate slope
+			- seB1 = sqrt(Var(B1hat))
+		+ Var(B0hat) = (1/n + Xbar^2) / sum((Xi - Xbar)^2)
+			- seB0 = sqrt(Var(B0hat))
+		+ tB1 = B1 / seB1, tB0 = B0 / seB0
+		+ In R:
+			- fit <- lm(y ~ x)
+			- summary(fit)$coefficients
+		+ WHAT ARE WE ACTUALLY TRYING TO DO HERE? WHAT IS THE VARIANCE OF B1 MEASURING?
+			- OK, the t-values are measuring the estimated B1 and B0 values as compared to zero. 
+			- So you have a standard error, and you're saying that the chances that you calculated this B1 value under the null hypothesis of B1 = 0 is (p-value).
+			- "with 95% confidence we expect a 1 unit increase in X to result in a lower-CI to upper-CI increase in Y"
+		+ WHAT IS THE DIFFERENCE BETWEEN B1 AND B1hat? This guy is awful at explaining.
+			- Sounds like B1hat is the estimate we've calculated from our sample, with the "true" relationship being B1
+			- And your calculated estimate has a variance and a standard error.
+		+ Prediction intervals
+			- Standard error for a point on the regression line:
+				+ sigma*(sqrt(1/n + ((X0 - Xbar)^2)/sum((Xi - Xbar)^2))
+			- Standard error for a predicted Y value:
+				+ sigma*(sqrt(1 + 1/n + ((X0 - Xbar)^2)/sum((Xi - Xbar)^2))
+			- Predicted confidence interval is wider than the regression line confidence interval
+			- predict(fit, newdata = data.frame(colname = x), interval = ("confidence")) (??) not sure what the second parameter does here...
+			- predict(fit, newdata = data.frame(colname = x), interval = ("prediction"))
+		
+Week 3
+	- Multivariable Regression
+		+ Confounding: an additional variable that correlates to your predictor and exerts its own influence over the result variable
+		+ Multiplicity: digging through many variables, and one of them happened to have a high p-value
+		+ Regressor = variable
+		+ Multivariable regression can handle many predictor variables
+			- Model search: how to determine which model to use
+				+ Multivariate regression usually performs well compared to more complex ML algorithms
+			- Overfitting: Reducing residuals so much for a single dataset that the model doesn't perform well on a different data set
+		+ Yi = B0 + B1*X1i + B2*X2i + ... + BP*XPi + ei = sum(Bj * Xji) + ei
+		+ Sum of Squares: sum((Yi - sum(Bj*Xji))^2)
+		+ Least squares wants to minimize this expression
+		+ The linearity of the model is defined by linearity in the coefficients, not the variables
+			- i.e. you can square your variables and still have a linear models if the coefficients are linear
+		
+		+ THE CONCEPT: 
+			- Each coefficient is optimizing the residuals of... Y and X1 minus all of the other Xji*Bj's.
+			- B2 is a regression through the origin (formula) of Y with Xji*Bj removed (??)
+			- (swirl) you can reduce a n-variable regression to an n-1 variable regression by:
+				+ taking a regressor and substituting both the outcome and all other regressors with their residuals when lm'd against the chosen one.
+				+ you can essentially "divide out" a regressor term by expressing each remaning variable in terms of its relationship with Z (your chosen regressor).
+				+ this reduction will leave the new coefficients unchanged, with the removed one removed, but the underlying data has been transformed.
+			
+		+ Multivariate regression coefficient is the expected change in response per unit change in regressor, while holding all other regressors fixed.
+		+ Multivariate properties:
+			- Yi = sum(Xik*Bk) + ei, where ei is standard normal error
+				+ This is for "true" Yi. For a "fitted response" Y, aka Yhat, you just drop the error term
+			- ei = Yi - Yhati (getting kind of circular here)
+			- Variance estimate: sigma^2 = (1/n-p)*sum(ei^2)
+			- Coefficients have standard errors
+				+ B1hat, B2hat
+				+ Can test whether those coefficients are zero using a t-test
+		+ lm(var1 ~ ., data = df)
+		
+		+ Can set up values of factor variables as their own binary variables in a multivariate regression:
+			- e.g. X1 is 1 for democrat, X2 is 1 for republican, both are 0 for independent, with independent being categorized as the default, or reference level.
+			- The selected reference level has a big effect.
+		+ R does this automatically. It will produce coefficients for n-1 factor levels, which represent the change in mean between factor level x and your reference level.
+			- The intercept will be the mean for factor level 1
+			- if you run lm without the intercept, you'll get mean values for all factor levels, and they won't be relevant to a reference
+				+ I'd probably prefer this... unless there is a clear level that should logically be assigned as a reference
+			- relevel(df$var, "factorName") will set a different factor as the reference level
+		+ So, be careful using factor regressors because:
+			- R will create a slope for each factor level
+			- the assignment of the refernce level has a big effect
+		+ Another way that you can do this manually:
+			- fit <- lm(y ~ x * factor(binaryVar), data = df)
+				+ This gives four coefficients:
+					- Intercept when factor is 0
+					- Slope when factor is 0
+					- Additional intercept when factor is 1
+					- Additional slope when factor is 1
+				+ You can use these coefficients as needed.
+				+ If you used a '+', then you'd lose the additional slope when factor is 1.
+					- the '*' gives you: Y = B0 + B1*X1 + B2*X2 + B3*X1*X2
+					- the B3 term becomes an X1 term when X2 is 1, thus is adding to the slope.
+	- Adjustment
+		+ Good for an A/B comparison, where T is a binary variable indicating group membership
+		+ Y = B0 + B1T + B2X + E
+			- This just shifts the intercept for the T group (??)
+		+ You can measure the difference in means between the two groups
+			- "marginal mean"
+		+ Or measure the differences in intercept
+			- "adjusting for x"
+		+ the means can be dramatically different, with small differences in fitted intercepts
+		+ B1a > B1b AND B0a < B0b. which cohort is "bigger"?
+			- Simpson's paradox
+	
+	- Residuals and Diagnositics
+		+ Leverage: a point that is "far" out but on the regression line (outside of primary clump of x-values)
+			- exerts larger leverage on the model's "fulcrum" (mean)
+		+ Influence: outliers that are off of the regression line. usually have high leverage as well.
+		+ ?influence.measures: a list of diagnostic tests to analyze residuals for influence and leverage
+			- rstandard, rstudent: attempt to standardize definitions of outliers using standard errors
+			- hatvalues: finds high leverage x-values
+			- dffits, dfbetas: compare fitted values and betas of fit lines with potentially influential points removed
+			- cooks.distance: overall change in coefficients, or, how much a given sample changes a model
+			- resid: ordinary residuals
+			- can call influence.measures to get all of these in a data frame.
+		+ Most effective diagnostic is to plot residuals vs. x-values (for linear), or residuals vs. y-values (multivariate)
+		+ Q-Q plot: tests normality of error terms. 
+		+ (swirl)
+			- Influence: When a sample is included in a model, it pulls the regression line closer to itself (orange line) than that of the model which excludes it (black line.) Its residual, the difference between its actual y value and that of a regression line, is thus smaller in magnitude when it is included (orange dots) than when it is omitted (black dots.) The ratio of these two residuals, orange to black, is therefore small in magnitude for an influential sample. For a sample which is not influential the ratio would be close to 1. Hence, 1 minus the ratio is a measure of influence, near 0 for points which are not influential, and near 1 for points which are.
+	
+	- Model selection
+		+ Ways for a model to be wrong:
+			- including a variable we shouldn't have will increase standard errors of the regression variables
+				+ R^2 and SSE improve with more regressors, but that is a flaw
+				+ If the variable you include is correlated to the variable you're interested in, standard errors are going to inflate
+			- omitting a variable that are important will add bias into correlated regressors in the model
+				+ Not clear why (shit teaching), but the takeaway is to not omit
+				+ When adding variables, you should run nested anova to check that the added variable has a significant effect
+		+ Variance Inflation Factor (VIF)
+			- (Variance when adding the ith regressor) / (if the ith regressor were orthogonal to other regressors)
+			- sqrt(VIF) is same ratio applied to standard errors
+			- vif(fit)
+		+ Nested model search
+			- Start with one variable of interest, then add in additional variables
+			- then compare the fits with anova
+				+ fit1(y ~ x1)
+				+ fit3(y ~ x1 + x2 + x3)
+				+ anova(fit1, fit3)
+					- ANOVA will give you an F-statistic to tell you if the added variables are providing significantly different results
+					- (or something)
+			- anova assumes normality. check for residual normality with the shapiro.test()
+
+Week 4
+	- Generalized Linear Models
+		+ LMs assume normal errors, GLMs assume errors from the exponential family
+		+ All GLMs have three components
+			- A response modeled on a distribution from the exponential family 
+			- A systematic component via a linear predictor (the portion of the model handled by predictive coefficients)
+			- A link function that connects the means of the response to the linear predictor (Ybar to Y, equivalence in simple linear model)
+				+ Essentially, the model produces a prediction that you transform into the scale of the original data
+		+ Examples:
+			- Normal
+				+ response distribution: Y ~ Normal(mu, theta^2)
+				+ linear predictor: n = sum(Xik*Bk)
+				+ link function: mu = n
+					- link function in the form of g(mu) = n
+			- Logistic ("logical", aka binomial)
+				+ Y ~ Bernoulli(mu)
+				+ n = sum(Xik*Bk)
+				+ n = log(mu/(1-mu))
+					- aka logit function
+					- e^n / (1 + e^n)
+			- Poisson 
+				+ Y ~ Poisson(mu)
+				+ n = sum(Xik*Bk)
+				+ n = log(mu)
+					- e^n
+		+ Solving for coefficients in GLMs is iterative, cannot be solved with linear algebra (could result in an NA solution)
+		+ GLMs cannot be adequately solved on small sample sizes
+		+ You don't use t-distributions to evaluate coefficients, but there are other distributions to use for CIs that are built in R
+
+	- Logistic models
+		+ Odds = P / 1-P
+		+ P = O / 1 + O
+		+ logit = log(O)
+		+ logit = b0 + b1Xi
+		+ exp(confint(logModel)) gives a confidence interval of the exponentiated coefficients (an interval we can work with)
+		+ fit <- glm(Y ~ X, data = df, family = "binomial")
+		+ lodds <- predict(fit, Xi)
+			- prob <- exp(lodds) / (1 + exp(lodds))
+		+ swirl: The coefficients estimate log odds as a linear function of points scored. They have a natural interpretation in terms of odds because, if b0 + b1*score estimates log odds, then exp(b0 + b1*score)=exp(b0)exp(b1*score) estimates odds. Thus exp(b0) is the odds of winning with a score of 0 (in our case 16/84), and exp(b1) is the factor by which the odds of winning increase with every point scored. In our case exp(b1) = exp(0.10658) = 1.11. In other words, the odds of winning increase by 11% for each point scored.
+		+ swirl: Linear regression minimizes the squared difference between predicted and actual observations, i.e., minimizes the variance of the residual. If an additional predictor significantly reduces the residual's variance, the predictor is deemed important. Deviance extends this idea to generalized linear regression, using (negative) log likelihoods in place of variance. To see the analysis of deviance for our model, type anova(mdl).
+			- anova gives a deviance, which is a chi-square value that you can hypothesis test against a null hypothesis of the coefficient = 0
+		
+	- Poisson
+		+ unbounded count data
+		+ OR rate data - percentages
+		+ OR contigency tables - factor-by-factor matrices of data
+		+ E[X] = tL, E[X/t] = L
+		+ Var(X) = tL
+		+ Poisson tends to normal with large tL
+			- log(L) = b0 + b1*t
+			- intercept: e^b0
+			- slope: e^b1
+			- e^E[log(Y)] = "geometric mean of Y" (e to the mean of the log of Y)
+			- log(E[Y|X, b0, b1]) = b0 + b1X
+			- E[Y|X, b0, b1] = exp(b0 + b1X)
+			- a change in X results in e^b1 change to Y
+		+ If variance is unequal throughout model, opt for quasi-poisson
+			- observe variance through a residual plot
+		+ Log offset -- when you are looking at a rate, and want to divide that rate by a relative term (to create a proportion), you'll end up adding a log(relative term) to your model, because when you log the division, it becomes log-subtraction, which gets added over to the model side.
+			- glm(Y ~ X, offset = log(var + 1), family = "poisson", data = df)
+				+ Need to add a +1 because you can't take a log of 0.
+	
+	- Hodgepodge
+		+ "splines", "knot points" -- fit a complex model with ordinary linear regression
+
+Example regression in ggplot
+	library(UsingR)
+	data(diamond)
+	g = ggplot(diamond, aes(x = carat, y = price))
+	g = g + xlab("Mass (carats)")
+	g = g + ylab("Price (SIN $)")
+	g = g + geom_point(size = 6, color = "black", alpha = 0.2)
+	g = g + geom_point(size = 5, color = "blue", alpha = 0.2)
+	g = g + geom_smooth(method = "lm", color = "black")
+	g
+	
+Things to figure out
+- Covariance, correlation, double-check B1 = Cov(X, Y) / Var(X)
+- The linear model produces a set of residuals that sum to zero and have zero covariance with the predictor variables
+	+ Does simply solving for these conditions produce an optimized model?
+	+ OR do you need to optimize a model that meets these conditions to also have minimal sum or squared residuals?
+	+ Swirl 1.3 says you find the regression by minimizing the ordinary least squares equation.
+- Variance of B1hat and B0hat
+	+ They're estimators of the 'true' linear relationship that are derived from *this* data
+- Prediction intervals, confidence intervals around the regression line
+	+ Re-watch Inference in Regression
+- Adjustment
+	+ Interaction ('*' vs '+' in lm)
+		- Interaction gives the change in BOTH regressors per factor, rather than just the change in intercept
+		- (from swirl) Hi = b0 + (b1*Ii) + (b2*Yi)+ (b3*Ii*Yi) + ei
+- Standardized residuals, Q-Q plot
+- General case of log transformations
+	+ logistic regression
+	+ poisson regression

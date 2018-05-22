@@ -1,0 +1,287 @@
+Week 1
+
+- Prediction
+	+ question > input data > features > algorithm > parameters > evaluation
+	+ features - variables that hold information. informed by SMEs or by automated process.
+	+ accuracy vs... speed, scalability, simplicity, interpretability
+- In and out of sample errors
+	+ In sample: error you get on the data set you're using to build your predictor
+		- aka resubstitution error
+	+ Out of sample: error you get when applying model to new data
+		- aka generalization error
+	+ In sample error is more optimistic than out of sample, since coefficients tune to noise within the sample (overfitting)
+- Study Design
+	+ All about defining the rules of your training set, test set, and validation set
+		- if you test on a test set more than once, then it is part of the training-feedback loop and could be overfit to
+		- Validation set is intended to be validated against one time
+		- 60/20/20 are good %s
+- Types of Errors
+	+ true positive, false positive, true negative, false negative
+	+ Sensitivity = P(positive | true)
+		- TP / (TP+FN)
+	+ Specificity = P(negative | false)
+		- TN / (TN+FP)
+	+ PPV = P(true | positive)
+		- TP / (TP+FP)
+	+ NPV = P(false | negative)
+		- TN / (TN+FN)
+	+ Accuracy = P(correct outcome)
+		- (TP+TN) / (TP+FP+TN+FN)
+		- good when wanting to weight FP and FN equally
+		
+	+ For continuous data
+		- mean squared error = 1/n * sum((yhati - yi)^2)
+		- root mean squared error
+			+ MSE sensitive to outliers
+		- median absolute deviation
+			+ more robust to outliers
+
+- ROC Curves
+	+ Used for modeling binary outcomes with numerical values
+	+ Shows P(TP) per change in P(FP)
+		- you want low P(FP) and high P(TP) hence the draw to the corner
+		- area under ROC curve (AUC) quantifies goodness of predictor
+		- AUC of 0.5 is a coin flip
+		- AUC > 0.8 is considered "good"
+
+- Cross Validation
+	+ Accuracy on a training data set is optimistic
+	+ Cross validation allows you to create a "test set" out of the training set
+	+ Random subsampling
+		- without replacement
+		- with replacement is bootstrapping
+			+ bootstrapping will under-estimate error
+			+ 0.632 bootstrapping to correct this error
+	+ K-fold
+		- 3-fold: 33/66 testing/training iterated with each third
+		- smaller k (number of folds) = more bias, less error
+		- larger k = less bias, more error
+			+ bias: close but consistently low (or high)
+			+ variance: consistently high-or-low
+	+ Leave one out
+		
+
+Week 2
+- Caret package
+	+ a package of functions that cover the concepts in Week 1
+		- inTrain <- createDataPartition(y=df$var, p=0.8, list=FALSE)
+			+ training <- df[inTrain,]
+			+ testing <- df[-inTrain,]
+		- fit <- train(Y ~ X, data = training, method = "glm")
+			+ fit$finalModel
+			+ train options
+				- preProcess
+				- weight
+				- metric
+					+ RSME
+					+ RSquared
+					+ Accuracy
+					+ Kappo
+				- trainControl
+					+ method
+						- boot
+						- boot632
+						- cv
+						- repeatedcv
+						- LOOCV (leave one out cross validation)
+					+ number
+					+ repeat
+		- prediciton <- predict(fit, newdata = testing)
+		- confusionMatrix(prediction, actualValues)
+		- folds <- createFolds(y=df$var, k=10, list=TRUE, returnTrain=TRUE)
+			+ folds[[1]][[1:10]]
+		- createResample
+			+ for bootstrapping etc.
+		- createTimeSlices
+
+- Plotting predictors
+	+ Do this to look for trends, outliers, confounding, etc
+	+ featurePlot(x=training[,c("var1", "var4", "var5")], y=training$var9, plot = "pairs")
+	+ qplot(var1, var9, data = training, color = var4)
+		- geom_smooth(method = "lm", formula = y~x)
+			+ The smoothers would automatically apply to the color defined in the qplot ... ?
+	+ Density plot:
+		- qplot(var1, var9, data = training, color = var4, geom="density")
+	+ create factor levels with cut2 (hmisc), and use them in boxplots, table, etc.
+	
+- Preprocessing
+	+ Some potentially troubelsome charactaristics can be resolved with preprocessing
+		- highly variant data can be standardized (mean 0, std 1)
+			+ preProcess(training[,-"var"], method = c("center", "scale"))
+				- Box-Cox: continuous data > approximately normal
+		- impute data
+			+ preProcess(training[,"var"], method = "knnImpute")
+				+ K-nearest neighbors imputation
+
+- Covariate (aka Feature) Creation
+	- curating variables into numeric, or factor variables
+	- counting, combining, transforming
+	- start out relationships based on science
+	- summarization vs. information loss
+	- so you're trying to distill the data into the relevant points, which you need to know before model creation
+	- when in doubt, create more features
+	- just distillation, especially for unstructured data
+	- all about visualization
+	- design of the covariates takes place in the training data set, and are then applied to the test set when testing
+	- convert factor variables to indicator variables (aka dummy variables)
+		+ dummyVars - transforms factor into a wider set of logical variables
+	- simple to remove variables with low impact (low % unique values, low variability)
+		+ nearZeroVars shows you a table with a nzv logical variable
+  
+- Preprocessing with Principle Component Analysis
+	- "a weighted combination of predictors"
+	- find a set of variables that are uncorrelated and explain as much variance as possible
+	- X = SDV >> left-singluar, right-singluar, singular values.
+		+ the formula is SDV, even though the method is called SVD...
+		+ V = PCA (when variables are first scaled)
+		+ PCA is essentially uncorrelated variables ranked by variability
+		+ But we aren't sorting variables, we're sorting weighted combinations of variables... ?
+		+ No, I think you're ordering them by variability, and these values end up being weighting coefficients, and you'd ditch the smallies
+	- preProcess(..., method = "pca", pcaComp = #)
+	- more common to set the PCA as a parameter in the train function
+  
+- Predicting with regression
+	+ Just a manual linear regression analysis, but with training and testing data
+	+ Compare training vs. test with errors
+		- RMSE
+			+ sqrt(sum((lm1$fitted-train$var)^2))
+			+ train dataset error is more realistic
+		- predict(lm1, newdata = test, interval = "prediction")
+	+ OR do it in caret
+		- fit <- train(Y ~ X, data = train, method = "lm")
+
+- Predicting with multivariate regression
+	+ featurePlot to look for relationships
+	+ fit <- train(Y ~ X1 + X2 + X3, method = "lm", data = training)
+		- fit$finalModel
+	+ plot fitted vs. residuals
+	+ plot index vs. residuals
+	+ plot actual vs. predicted
+	
+	
+Week 3
+- Predicting with trees
+	+ split variables into groups, until each group contains homogeneous outcomes
+	+ subject to overfitting
+	+ difficult to measure error
+	+ make branches where the leaves account for a certain benchmark of purity
+		- Misclassificatoin and Gini error
+			+ 0 = perfect purity
+			+ 0.5 = no purity
+		- Deviance/Information gain
+			+ 0 - 1 scale
+		- example:
+			+ misclassification: 1/16 = 0.06
+			+ Gini: 1- [(1/16)^2 + (15/16)^2] = 0.12
+			+ information: -[(1/16) * log2(1/16) + (15/16) * log2(15/16)] = 0.34
+	+ fit <- train(Y ~ ., method = "rpart", data = training)
+		- fancyRpartPlot (rattle package)
+
+- Bagging (bootstrap aggregating)
+	+ averaging several models together
+	+ resample and recalculate predictions
+	+ then mean, median, or mode (or other) your predictions together
+	+ caret
+		- bagEarth
+		- treebag
+		- ctreebag
+		- bagFDA
+
+- Random Forests 
+	+ bootstrap samples, rebuild classification tree
+	+ at each split, resample the variables
+	+ grow many trees and either vote or average
+	+ pros: very accurate
+	+ cons: slow, interpretability, overfitting
+	+ caret
+		- fit <- train(Y ~ ., data = training, model = "rf", prox = TRUE)
+		- pred <- predict(fit, testing)
+	+ ensure cross validation takes place (??)
+
+- Boosting
+	+ take a group of weak predictors, weight them, add them up
+	+ try something, "upweight" mis-classified points, try again
+	+ can boost something with many types of classifier algorithms
+		- gbm (trees), mboost (model), ada (additive logistic regression), gamBoost (generalized additive models) ...
+	+ caret
+		- fit <- train(Y ~ ., method = "gbm", data = training, verbose = FALSE) 
+		
+- Model based prediction
+	+ Assumes the data follows a probabilistic model
+	+ Use Bayes theorem to identify optimal classifiers
+	+ pros: reasonably accurate and computationally efficient when data follows some underlying distributions
+	+ cons: if the distribution isn't there, then the results won't be accurate
+	+ most common assumption is a multivariate gaussian distribution with same covariances -- linear discriminate analysis
+	+ Naive Bayes assumes independence between independence between variables
+	+ Linear Discriminant Analysis
+		- essentailly "draws a pie chart" through your cloud of data
+	+ Naive Bayes
+		- something about "Bayesian Priors" :) 
+		- it is naive to assume independence :) 
+		- works well for large number of binary features
+		
+Week 4
+- Regularized regression
+	+ fit a regression model
+	+ penalize (shrink) large coefficients
+	+ pros: help with bias/variance tradeoff ...
+		- because you're not removing the variable exactly, but still reducing variance ... (?)
+	+ cons: computationally demanding, not as great as rf or boosting
+	+ Y = B0 + (B1 + B2)X1 + e
+		- if X1 and X2 are highly correlated
+	+ regression can easily overload with coefficients and overfit
+		- to correct for this, insert an additional term into the optimization function that is lambda(sum(betas)), so that having a large number of large betas prevents optimization
+
+- Combining predictors (ensembling method)
+	+ combine classifiers by averaging or voting
+	+ the classifiers can come from different models
+	+ increase accuracy, reduce interpretability
+	+ need a validation, training, and test
+	+ method
+		- fit two different models
+		- predict the models with testing data
+		- create a new dataframe with predict1, predict2, and validation$Y (or test, whichever)
+			+ predDF <- data.frame(pred1, pred2, testing$Y)
+		- train a new model: fit <- train(Y ~ ., method = "gam", data = predDF)
+		- combpred <- predict(fit, predDF)
+
+- Forecasting
+	+ time series
+	+ dependent over time
+	+ trends, seasonal, cycling
+	+ subsetting into train and test is more complicated
+	+ similar challenges to spatial data
+	+ don't extrapolate far into the future
+	+ decompose() to seek out trends, seasonal, cycling patterns
+	+ evaluation
+		- simple moving average	
+		- exponential smooting
+	+ Forecasting: Principles and Practice
+
+- Unsupervised Prediction
+	+ you don't tell the algorithm which variables to use
+	+ the algorithm has to cluster the data and create its own variables essentially
+	
+Misc:
+	+ Brier Score is just mean squared error
+		- (sum(ei - oi)^2)/n
+	+ You can use the ROC to pick your threshold for classification (when using a probability to classify logistic outcomes). Whatever ROC point is closest to 1.
+	+ C-stat:
+		- NOT P(correct classification). 
+		- More like: "this model produces true positives over false positives by a measure of C
+		- aka Discrimination
+	+ Calibration measures how close predictions re to "real" probability
+		- Calibration Curves: plot Sum of Actual x Sum of Estimate. Should be slope = 1.
+	+ Goodness of fit as Chi-Squared between estimated regression line and y=x.
+		- Chi-squared = sum[(ei - oi)^2/ei]
+	+ Biased Algorithm: models are consistent, but inaccurate
+	+ Variant Algorithm: models are accurate on average, but inconsistent
+		- Should generally prefer bias over variance (especially for non-ensemble methods)
+		- "what would a new training dataset do to your model?"
+			+ high variance tends to overfit. a new dataset would prefer a wildly different, overfitted, model.
+			+ high bias will be resilient to changing characteristics of a dataset, but sacrifices accuracy (underfit).
+	
+Circle back to quiz questions:
+- 2.5
+- 3.3, 3.4, 3.5
+- 4.3, 4.4, 4.5

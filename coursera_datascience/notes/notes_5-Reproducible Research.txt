@@ -78,6 +78,45 @@
 		- good for medium-length, more formatted documents
 			+ Manuals, tutorials, reports
 		- not good for very large documents, complex formatting, or documents with heavy computations
-		
-		
-	+ knitr
+
+- Week 3
+	+ Communicating Results
+		- Research paper format -- title, abstract, body/analysis/results, supplementary details, code/data
+		- Write concise emails
+	+ RPubs
+		- R-studio site to publish knitr and such
+		- Just puts your markdown on the web for you
+	+ Reproducible research checklist
+		- Start with Good Science -- coherent, focused question
+		- Script everything. Don't do anything manually. Don't point and click. -- editing spreadsheets, downloading datasets
+		- Teach a computer to do it. This guarantees reproducibility.
+		- Use some version control -- slow things down, add in small chunks with comments
+		- Keep track of your software environment -- CPU (intel, ARM, AMD), OS, 'software toolchain', libraries, packages, other dependencies
+			+ sessionInfo() gives you much of this
+		- Don't save output until the very end
+		- Set your seed when using random number generators
+		- Ensure quality throughout the entire pipeline
+	+ Evidence-based data analysis
+		- Reproducibility does not guarantee validity of the original analysis
+		- Mistakes upstream will be sent down, and may or may not be caught when reproduced
+		- Suggestion of a "Deterministic Statistical Machine" to prescribe a data analysis pipeline with minimal input
+			+ Libraries tailored to scientific areas and questions being asked
+			+ If standards are followed, you can quickly agree that analysis is likely valid	
+			+ Assigned to fix? Futured?
+
+- Week 4
+	+ Caching Computations
+		- Raw data > processing code > tidy data > analytic code > computed conclusions > presentation code > output
+		- Store your computational results in an available database	
+		- cacher package
+			+ puts code and data in a bundle to distribute
+			+ parses source file
+			+ creates directories and subdirectories
+			+ cycle through expression and evaluate it and store objects and metadata
+			+ creates a SHA-1 hash that others can read and clone with cacher
+				- data not loaded by default
+			+ funtions	
+				+ runcode
+				+ checkcode
+				+ checkobject
+				+ loadcache

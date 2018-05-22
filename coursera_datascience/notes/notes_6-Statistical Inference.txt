@@ -1,0 +1,241 @@
+Week 1
+	- Probability
+		+ PMF is for discrete random variables
+		+ PDF is for continuous random variables
+		+ Bernoulli pmf: p(k; p) = p^k(1-p)^1-k
+		+ CDF is the "or fewer" concept
+		+ Survivor function is 1 - CDF
+		+ Quantiles:
+			-  qbeta(0.5, 2, 1)
+		
+	- Bayes' Theory
+		+ Conditional
+			- P(AuB)=P(A)+P(B)-P(AnB)
+		+ P(A|B) = P(B|A)*P(A) / [P(B|A)*P(A) + P(B|`A)*P(`A)]
+			- Prevalence = P(A)
+			- Sensitivity = P(B|A)
+				+ P of a positive test given a disease.
+				+ Is your test sensitive enough to catch the disease when it is there?
+			- Specificity = P(`B|`A)
+				+ P of a negative test given no disease.
+				+ Is your test detecting the disease, specifically? Or is it just picking up every damn thing?
+				+ P(B|`A) = 1 - P(`B|`A)
+			- Positive Predictive Value = P(A|B) <<-- Bayes formula
+			- Negative Predictive Value = P(`A|`B)
+			- Likelihood Ratios
+				+ [P(A|B) / P(`A|B)] = [P(B|A) / P(B|`A)] * [P(A) / P(`A)]
+				+ [The odds of A, given B] = [Diagnositc Likelihood Ratio of B] * [Odds of A alone]
+				+ How does the presence of B change the odds of A?
+				
+Week 2
+	- ??Variance?? <<-- Need to solidify this guy. I think this video is awful with terminology...
+		+ Var(X:population) = E[(X - u)^2] = E[X^2] - E[X]^2
+		+ Var(X:sample) = [sum(Xi - Xbar)^2] / (n-1)
+			- "divide by n-1 instead of n to make it unbiased"
+		+ Expected value of the sampling variance (mean of samples' variance) ~=~ population variance
+			- variance among sample means = sigma^2 / n = Var(X:population) / n
+				+ Since sampling variance estimates Var(X:population), you can sub-in sampling variance into the above (given large enough data)
+				+ the standard error becomes [population variance / n]^(1/2) aka [S / n^(1/2)], the standard error of the mean.
+				+ The sampling variance converges to zero with more numerous samples
+		+ S is standard deviation, a measure of spread in the population's data points
+			- Sampling variance can estimate population variance
+		+ S / n^(1/2) is standard error, a measure of spread among n sample means  (where n is number of observation, not sample size)
+	- Distributions
+		+ Bernoulli
+			- Single coin flip
+			- P(X = x) = p^x(1-p)^(1-x). Simplifies to p when x (success) equals 1. 
+			- Var(X) = p(1-p)
+		+ Binomial
+			- Sum of iid Bernoulli RVs
+			- Total number of successes in n trials
+			- nCx = [n!/x!(n-x)!]
+				+ nC0 = nCn = 1
+				+ choose() -- 0.03125 + 
+			- P(X = x) = (nCx)p^x(1-p)^(n-x)
+		- Poisson
+			- Count of events over time. Count being the key word, or Rates.
+			- P(X = x; l) = [(l^x * e^-l) / x!]
+			- E(X) = l
+			- Var(X) = l
+			- X ~ Poisson(lt) where...
+				+ l =  E(X/t) = the expected count per unit time
+				+ t = total monitoring time
+			- Poisson can estimate a binomial distribution when n is large and p is small (n = 500, p = 0.01)
+	- Asymptotics
+		+ LLN: Law of Large Numbers
+			- The average converges to what it is estimating: the population mean
+				+ Poisson rates converge to the true rate as time goes to infinity
+			- An estimator is consistent if it converges to what you want to estimate
+				+ Mean, stdev, and variance are all consistent
+		+ CLT: Central Limit Theorem
+			- The distribution of averages of iid variables (properly normalized) becomes that of a standard normal distribution as the sample size increases
+			- [(Estimate) - (Mean of Estimate)] / (Std. Error of Estimate) -- is normally distributed with a large n
+				+ this is normalization
+				+ (Mean of Estimate) is equal to the sampling mean (mean of means), which is the population mean.
+				+ distribution of means has stdev equal to (Std. Error of Estimate)
+				+ CLT does not guarantee that n is large enough for approximations to be accurate.
+		+ Confidence intervals
+			- Taking the mean and adding/subtracting the normal quantile (Z-value) times the standard error gives a confidence interval for the mean
+			- Two standard deviations (1.96) gives a 95% confidence interval
+			- Binomial and Poisson don't 
+
+Week 3
+	- Confidence Intervals
+		+ Estimate +/- T-value * Standard Error (?)
+			- T-value is T with n-1 DoF
+		+ T has heavier tails than standard normal (Z)
+		+ When in doubt, use T-vales, since they converge to Z-distribution with a larger sample
+		+ T is described by one variable: Degrees of Freedom
+			- DoF can be estimated by n-1
+			- Subtract one because the last variable can be solved by the others (no new info)
+		+ As n increases, differences between T and Z decrease
+		+ T interval assumes iid normal, but basically "anything symmetric and round shaped" can be evaluated
+		+ Skewed distributions are not viable with T intervals
+			- Can convert to log scale, often removes the skew
+		+ Discrete data, like binary and poisson, have more appropriate intervals
+	- Examples
+		+ t.test(difference)
+		+ t.test(g1, g2, paired = TRUE)
+		+ Confidence interval: mu + c(1, -1) * qt(0.95, DoF) * std/n^0.5
+		+	#show 4 different calls to t.test
+			#display as 4 long array
+			rbind(
+			  mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n),
+			  as.vector(t.test(difference)$conf.int),
+			  as.vector(t.test(g2, g1, paired = TRUE)$conf.int),
+			  as.vector(t.test(extra ~ I(relevel(group, 2)), paired = TRUE, data = sleep)$conf.int)
+			)
+	- Independent group T confidence intervals
+		+ aka Randomized Trials aka A/B testing
+			- randomize the samples to avoid confounding
+		+ paired t-test only works when you can match observations from one sample to another
+		+ instead use independent group t intervals
+		+ (Y - X) +/- T-value[nx + ny - 2] * Std. Error
+			- Std. Error = Sp(1/nx + 1/ny)^1/2
+			- Sp^2 = "pooled variance" = {(nx - 1)Sx^2 + (ny - 1)Sy^2}/(nx + ny - 2)
+				+ "average" of group 1 variance and group 2 variance, but weighted by DoF in the samples
+			- t.test(g1, g2, conf.level = 0.95)
+				+ if you build the confidence interval by hand, you'd have to use qt(1-a/2, df), to give it the two-tailed quantile.
+		+ paired-T, you can assume variances are equal between groups, or not
+			- Std. Error function (above) assumes equal variance between groups
+			- unqeual variances can be estimated by a standard t interval, BUT needs an elaborate formula for DoF
+				+ t.test(g1, g2, paired = TRUE, var.equal = FALSE)
+			- when in doubt, assume unequal variances between groups
+	- Hypothesis Testing
+		+ t.test(g1.stat - g2.stat)
+		+ H null, H proposed. 
+		+ Z = m_0 - m_a / (s/sqrt(n))
+		+ 95% of the time, your sample mean will be within this interval of the hypothesized population mean
+			- Is your sample mean in that range?
+			- If yes, then we fail to reject the null hypothesis, it is possible that the sample mean got its value by chance
+			- If no, then we reject the null (Hn is greater than X), because it will only be outside of your range 5% of the time by chance
+		+ Two-sided T-test is different than a paired-T test
+			- Two-sided has to do with your hypothesis statement (not equals). Paired has to do with your test statistic (difference of pairs).
+		+ Example: chickWeight
+			- t.test(gain ~ Diet, paired = FALSE, var.equal = FALSE, data = chickdf)
+				+ Diet would have to be variable with only two values
+	- P-values
+		+ Assuming the Hnull to be true, how likely is it to have gotten the result we got?
+		+ pnorm(2, lower.tail = FALSE) 
+			- ^gives the p-value of 2 on a standard normal
+			- ^^the lower.tail just indicates greater than or less than the first param.
+		+ ppois(9, lambda = 5, lower.tail = FALSE)
+			- ppois and pbinom jank up the first argument. you have to use (test value - 1) b/c the function looks for p>test-value
+
+Week 4
+	- Power
+		? I get the math, but how do you formulate a hypothesis with a specific mu_a?
+			- you design the study, and use possible mu_a values to land on ideal n and power (1-beta) values?
+			- then you run the tests. If it plays out as envisioned, it will have good power and will tell you something useful.
+		+ The probability of rejecting h0 when h0 is false
+		+ A poorly designed study will have low power, and you'd expect not to be able to often reject h0 (e.g. small sample sizes)
+		+ Design a study with high power, so if you do not reject, you know that is meaningful
+		+ Type II error, aka Beta error = 1 - Power
+		+ Given a specific value for hA, what is the chance that a value from the hA distribution will reject the null hypothesis?
+			- smaller alpha means less of a chance to reject h0, less power
+				+ if you're looser on when you reject, you'll reject everything more frequently, including true negatives
+			- lower variance gives you higher power (less noise)
+			- higher hA yields higher power
+			- higher n yields higher power (more signal)
+		+ (mu_a - mu_0) / sigma = EFFECT SIZE, the difference in means by stdev units. 
+		+ power.t.test(power = 0.8, delta = 2, sd = 1, type = "one.sample", alt = "one.sided")$n
+			
+	- Mulitple Testing
+		+ Multiple testing is a problem where analysis generates several p-values, and presents only the significant ones
+		+ Corrected by definitions of error measure, and correaction
+		+ Applying old techniques (designed for small data) on large datasets will yield misleading significance
+		+ Testing many hypotheses will result in alpha errors. Don't let those fools get away with it.
+		+ Error Rates
+			- False positive rate: proportion of false-positives over actual negatives
+			- Family wise error rate (FWER): P(at least one false positive)
+			- False discovery rate (FDR): Rate at which claims of significance are false: false-positives over claimed positives
+			- Controlling error rates
+				+ Smaller p-value yields fewer false-positives
+				+ Bonferroni correction (FPR, FWER)
+					- P(FP >= 1) < alpha
+					- alpha-new = alpha / number of tests
+					- p.adjust(pValues, method="bonferroni")
+				+ Benjamini-Hochberg (FDR)
+					- Given m repetitions of a hypothesis test
+					- "about alpha percent of the positives you're claiming will be false"
+					- calculate all p-values and order them smallest to largest
+					- Loop through (including originally insignificant ones): if P(i) < alpha * i/m, call P(i) as significant 
+						+ Allows larger-but-significant values to remain significant (as opposed to more conservative Bonferroni)
+					- p.adjust(pValues, method="BH")
+				+ Adjusted P-values
+					- Don't adjust alpha, but adjust p-values.
+					- This makes them no-longer p-values, but can still be used similarly.
+					- Essentially the same as modifying alpha, but could be a simpler alternative in some cases
+	
+	- Resampling
+		+ Boostrapping
+			- Provides confidence interval for a median without needing as much math
+			- If you have a single sample, of size n, and you don't know the true underlying distribution
+			- You can repeatedly sample n values (with replacement) from the single sample to run simulations and find the distributions
+			- resamples <- matrix(sample(x, n * B, replace = TRUE), B, n)
+				+ n * B is the total number of draws from x, then you make an B by n matrix.
+				+ apply(resamples, 1, mean)
+			- BCA interval is a better-performing confidence interval for bootstrapping
+				+ Available in the bootstrap package
+		+ Permutation tests (?)
+			- Not explained well AT ALL
+			- Take two sets of labelled samples. Observe the difference in their mean.
+			- Then, resample the combined data (x10000) and randomly re-label it. Store the test statistic (mean) for each resampling.
+			- Determine how many of the mean differences of the resampled set were greater than the original.
+			- If few, then the original was the most-different arrangement of the data. You can't get more-different results from random chance.
+			- If many, then the samples were roughly equivalent, and their difference can be explained by random chance.
+			- You can histogram the resampling statistic and write a confidence interv al for the original.
+			- sample(labels) would permute an array of labels for you.
+			
+Concepts to review: 
+Population variance, Sample variance, Standard Error
+	- Population variance
+		+ Sum of squared differences from the mean divided by n.
+	- Sample variance
+		+ Sum of squared difference from the mean divided by n-1.
+	- Sampling
+		+ Mean of samples' variance converges to population variance.
+		+ Variance of samples' mean converges to population variance / n.
+			- Multiply it by n to estimate the population variance.
+	- Standard error
+		+ Just another term for standard deviation (??)
+			- Close, but not exactly.
+			- Standard deviation measures dispersion of data in a dataset.
+			- Standard error specifically measures dispersion between a statistic and it's expected population value.
+				+ e.g. the difference between a sample mean and the population mean.
+		+ Gets slightly complicated with sampling mean, and with pooled variance, since they have their own formula for variance.
+		+ "Standard Error of the Mean", is just sqrt(population variance / n), or the standard deviation among sample means. 
+	- Pooled variance
+		+ Used for independent two-sample t-test
+		+ Correct formula is above
+	- Kahn Academy: Why we divide by n-1 for the unbiased variance.
+		+ When you're calculating a sample's variance, you're using Xbar as an estimate of the population mean.
+		+ But Xbar is a function of your sample. 
+		+ So when you're summing the distance to Xbar for each Xi, Xi has a direct influence on Xbar.
+		+ Xi brings Xbar closer to it.
+		+ So if you had a highly variant sample, it wouldn't seem highly variant, because you're getting Xbar from that sample.
+		+ On average, it will under-estimate the variance, which is why we use a correction by dividing by n-1.
+		+ BONUS: taking the sqrt(unbiased variance) gives us a BIASED standard deviation. 
+			- But we use it anyway because there is no easy correction.
+		
+How to state a hypothesis in designing for power
