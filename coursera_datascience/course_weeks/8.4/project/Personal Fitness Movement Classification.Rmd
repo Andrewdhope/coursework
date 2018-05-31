@@ -122,7 +122,9 @@ The training data set now has 53 variables, which will all be included as potent
 
 ## Algorithm Evaluation
 
-The question in this analysis calls for a classification model. For this analysis I selected three common classification algorithms as candidtates for the final model. I ran the three models with default settings and observed if one would clearly outperform the others. I observed that a random forest did indeed outperform both gradient boosting and naive bayes.
+The question in this analysis calls for a classification model. For this analysis I selected three common classification algorithms as candidtates for the final model. For each, I calculated the accuracy of predictions against the validation data set. This provides an expected out of sample error for each mdoel. 
+
+I ran the three models with default settings and observed if one would clearly outperform the others. I observed that a random forest did indeed outperform both gradient boosting and naive bayes.
 
 ### Gradient Boosting
 ```{r fit.gbm, cache = TRUE}
@@ -134,6 +136,8 @@ Observe the accuracy of the prediction on the validation data set.
     pred.gbm <- predict(fit.gbm, df.val)
     sum(pred.gbm == df.val$classe)/length(df.val$classe)
 ```
+
+While GBM delivers a very high in-sample accuracy, it seems to have overfit and does not perform as well against the validation data.
 
 ### Naive Bayes
 
