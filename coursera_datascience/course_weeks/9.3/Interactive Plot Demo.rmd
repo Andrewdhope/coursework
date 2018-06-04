@@ -1,0 +1,29 @@
+---
+title: "Interactive Plot Demo"
+author: "Andrew Hope"
+date: "May 31, 2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r package, warning = FALSE, message = FALSE}
+library(plotly)
+library(dplyr)
+```
+
+```{r data, cache = TRUE}
+df <- read.csv("drinks.csv")
+df <- df[order(df$total_litres_of_pure_alcohol, decreasing = TRUE),]
+df.head <- df[1:20,]
+df.head <- mutate(df.head, servings_lead = sapply(1:20, function(x) {order(c(df.head[[x, 2]], df.head[[x, 3]], df.head[[x, 4]]), decreasing = TRUE)[1]}))
+df.head$servings_lead = cut(df.head$servings_lead, breaks = 3, labels = c("beer", "spirits", "wine"))
+```
+
+```{r plot, message = FALSE, warning = FALSE}
+plot_ly(df.head, x = as.character(df.head$country), y = df.head$total_litres_of_pure_alcohol, mode = "markers", color = as.factor(df.head$servings_lead)) %>% layout(margin = list(l = 50, r = 50, b = 200, t = 50, pad = 4), yaxis = list(title = "Liters of Pure Alcohol (all types)"))
+```
