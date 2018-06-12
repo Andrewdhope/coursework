@@ -1,0 +1,35 @@
+---
+title: "Basketball Player Salaries Predicted by Box Score Statistics"
+author: "Andrew Hope"
+date: "June 5, 2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Would you rather be:
+- Underpaid?  
+
+Or  
+
+- Overrated?
+
+## For your viewing pleasure
+
+This application, presented in Shiny, allows the user to visualize which NBA players are paid more or less than their statistical contributions suggest they are worth.
+
+- Data retrieved from the nbastatr package.
+- The predictions are generated form a multivariate linear regression, using traditional box-score statistics.
+- The user can select between models based on player career totals, or per game averages.
+
+## Slide with R code
+
+```{r cars, echo = TRUE}
+print("Here's where I throw in some r code...")
+```
+
+## Without further ado
+
+[Give it a try!](https://andrewdhope.github.io/coursework/coursera_datascience/course_weeks/9.4/Slidy Slides.html)
