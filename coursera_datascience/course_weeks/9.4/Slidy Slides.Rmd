@@ -32,4 +32,4 @@ print("Here's where I throw in some r code...")
 
 ## Without further ado
 
-[Give it a try!](https://andrewdhope.github.io/coursework/coursera_datascience/course_weeks/9.4/Slidy Slides.html)
+[Give it a try!](https://andrewdhope.shinyapps.io/Salary_Regression/)
