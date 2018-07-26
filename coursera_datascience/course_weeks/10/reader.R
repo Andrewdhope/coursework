@@ -15,10 +15,12 @@ reader.subset <- function(filename, limit) {
     
  con <- file(filename, "rb")
  line <- readLines(con, 1) # read first line
+ l <- 1
  while ( length(line) != 0 ) {
     # operate on the first line
+    l <- l + 1
     val <- innerLoop(line)
-    if (val == 1) {
+    if (!(l %% 4) > 0) {
         if (n == 0) {set <- line}
         else {
             preset.operation(line)
@@ -40,8 +42,8 @@ preset.operation <- function(line) {
 
 innerLoop <- function(line) {
     # pop in a quick function
-    rbinom(1, 1, 0.05)
-    # grep("biostats", line, value = TRUE)
+    # rbinom(1, 1, 0.05)
+    return(1)
 }
 
 breakLoop <- function(line, val, n) {

@@ -17,7 +17,6 @@ clean.corpus <- function(corpus) {
 #
 # freq.list
 #   return a list of unique words that account for a % of all words in a dtm
-#   CHECK IF THIS STRIPS OUT TWO-LETTER WORDS
 freq.list <- function(dtm, threshold = 0.85) {
     freq <- colSums(as.matrix(dtm))
     ord <- order(freq, decreasing = TRUE)

@@ -42,59 +42,9 @@ compress <- function(filename, n) {
 }
 
 
-#
-# gram: string to solve for. currently assuming 3-word string.
-# mode: 1-blogs, 2-twitter, 3-news, 4-all
-#
-solve <- function(gram, mode, n) {
-    filename.dtm <- makefilename.dtm(mode, n)
-    filename.freq <- makefilename.freq(mode)
-    load.dtm <- load(filename.dtm)
-    load.freq <- load(filename.freq)
-    candidate.list <- next.gram.candidates(dtm, gram)
-    probs <- candidate.to.dist(candidate.list, top.grams)
-    probs <- sort(probs, decreasing = TRUE)
-    probs
-}
-
-# version 2 - load dtms from file, with "back-off" methods. return probability compared to a freq_list.
-solve2 <- function(gram, mode) {
-    path <- 'C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/files'
-    setwd(path)
-    filename.freq <- makefilename.freq(mode)
-    load.freq <- load(filename.freq)
-    len <- length(strsplit(gram, " ")[[1]])
-    
-    for (n in c(3:1)) {
-        n.gram <- character()    
-        filename.dtm <- makefilename.dtm(mode, n)
-        load.dtm <- load(filename.dtm)
-        if (n == 1) {
-            n.gram <- strsplit(gram, " ")[[1]][len]
-        }
-        else {
-            for (i in c((len-n+1):len)) {
-                n.gram <- paste(n.gram, strsplit(gram, " ")[[1]][i], sep = " ")
-            }
-        }
-        n.gram <- trimws(n.gram) # trim leading space
-        print(n.gram)
-        print(filename.dtm)
-        candidate.list <- next.gram.candidates(dtm, n.gram)
-        if (length(candidate.list) > 0) {
-            break} # UGLY. WILL REPLACE WITH TRY-CATCH.
-    }
-    probs <- candidate.to.dist(candidate.list, top.grams)
-    probs <- sort(probs, decreasing = TRUE)
-    probs
-}
-
-# version 3 - use next.gram.candidates2, return the candidate list rather than the probability list. 
 solve3 <- function(gram, mode) {
     path <- 'C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/files'
     setwd(path)
-    filename.freq <- makefilename.freq(mode)
-    load.freq <- load(filename.freq)
     len <- length(strsplit(gram, " ")[[1]])
     
     for (n in c(3:1)) {
@@ -113,9 +63,13 @@ solve3 <- function(gram, mode) {
         print(n.gram)
         print(filename.dtm)
         candidate.list <- next.gram.candidates2(dtm, n.gram)
-        # if ((length(candidate.list[[1]]>0))&&(candidate.list[[1]][1] > 0)) {
         if (length(candidate.list) > 0) {
             break} # UGLY. WILL REPLACE WITH TRY-CATCH.
+    }
+    if (n == 1) {
+        load("freq.dist.txt.gz")
+        candidate.list[[1]] <- 1
+        candidate.list <- sample(names(top.dist), 1, prob = top.dist) # if candiate.list doesn't return values, take a random stopword.
     }
     candidate.list
 }
@@ -123,7 +77,7 @@ solve3 <- function(gram, mode) {
 
 makefilename.dtm <- function(mode, n) {
     #if (mode==1) {modefile <- "abbrev.blogs.txt"}
-    if (mode==1) {modefile <- "60K.blogs.txt"}
+    if (mode==1) {modefile <- "50K.blogs.txt"}
     #if (mode==2) {modefile <- "abbrev.twitter.txt"}
     if (mode==2) {modefile <- "30K.twitter.txt"}
     #if (mode==3) {modefile <- "abbrev.news.txt"}
@@ -136,13 +90,9 @@ makefilename.dtm <- function(mode, n) {
     filename
 }
 
-makefilename.freq <- function(mode) {
-    if (mode==1) {filename <- "freq_blogs.txt.gz"}
-    if (mode==2) {filename <- "freq_twitter.txt.gz"}
-    if (mode==3) {filename <- "freq_news.txt.gz"}
-    if (mode==4) {}
-    filename
-}
+#
+# 
+# 
 
 write.new.set <- function(readname, writename, limit) {
     reader.setwd()

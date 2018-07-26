@@ -11,12 +11,13 @@ make.files <- function(type) {
     if (type==1) {string <- "blogs"}
     if (type==2) {string <- "tiwtter"}
     if (type==3) {string <- "news"}
+    writename <- string
     readname <- paste("en_US", string, "txt", sep = ".")
-    for (i in c(1:10)) {
-        writename <- paste(string, i, sep = "")
+    # for (i in c(1:10)) {
+        # writename <- paste(string, i, sep = "")
         writename <- paste(writename, "txt", sep = ".")
         write.abbrev("en_US.blogs.txt", writename, 1000)
-    }
+    # }
 }
 
 get.lines <- function(type, num = 1) {
@@ -24,9 +25,10 @@ get.lines <- function(type, num = 1) {
     if (type==1) {string <- "blogs"}
     if (type==2) {string <- "tiwtter"}
     if (type==3) {string <- "news"}
+    filename <- string
     path <- paste(".","eval",string,sep = "/")
     setwd(path)
-    filename <- paste(string, num, sep = "")
+    #filename <- paste(string, num, sep = "")
     filename <- paste(filename, "txt", sep = ".")
     lines <- reader.all(filename)
     lines
@@ -59,37 +61,6 @@ corpus.to.list <- function(corpus) {
     var
 }
 
-create.comparison.orig <- function(list) {
-    path <- 'C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/files'
-    setwd(path)
-    n <- length(list)
-    comparison <- vector("list", n)
-    # loop over each line in the cleaned corpus list
-    for (i in seq_along(list)) {
-        rline <- ceiling(runif(1, 0, length(list[[i]]))) # select a random line of text from the list entry
-        words <- strsplit(list[[i]][[rline]], " ") # split into a set of words
-        if (length(words[[1]]) > 3) {
-            rpos <- ceiling(runif(1, 0, length(words[[1]])-3)) # select a position between the start and end-3  of the set
-            four.gram <- words[[1]][rpos:(rpos+3)]
-            trimws(four.gram)
-            three.gram <- words[[1]][rpos:(rpos+2)]
-            trimws(three.gram)
-            one.gram <- words[[1]][rpos+3]
-            n.gram <- character() # new n.gram
-            # paste n.gram words into a single string
-            for (j in c(1:3)) {
-                n.gram <- paste(n.gram, three.gram[j], sep = " ")
-            }
-            n.gram <- trimws(n.gram)
-            print(paste("line:",i), sep = "")
-            guess <- solve2(n.gram, 1) # hard-coded for blogs at this point
-            comparison[[i]][1] = n.gram
-            comparison[[i]][2] = one.gram
-            comparison[[i]][3] = names(guess[1])
-        }
-    }
-    comparison
-}
 
 create.comparison <- function(list) {
     path <- 'C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/files'
@@ -118,7 +89,7 @@ create.comparison <- function(list) {
             if (length(guess) > 0) {
             comparison[[i]][1] = n.gram
             comparison[[i]][2] = one.gram
-            comparison[[i]][3] = guess[1] # this still isn't quite right
+            comparison[[i]][3] = guess[1] # need a tiebreak if length of guess > 1
             }
             else {print("no guess")}
         }
