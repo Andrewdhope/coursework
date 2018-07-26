@@ -1,0 +1,12 @@
+name: guess-that-gram
+title: guess-that-gram
+username:
+account: andrewdhope
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 382300
+bundleId: 1502093
+url: https://andrewdhope.shinyapps.io/guess-that-gram/
+when: 1532622262.90147
+asMultiple: FALSE
+asStatic: FALSE
