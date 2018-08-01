@@ -1,6 +1,6 @@
-# course_week:
+# course_week: 2.2
 # description: Loop through a set of files, find the mean of one of the file's columns, and put the mean of a file as a row in a data frame
-# make generic: yes
+# make generic: no
 pollutantmean <- function(directory, pollutant, id = 1:332, debug = 0) {
   full_df = data.frame()
   for (i in id){

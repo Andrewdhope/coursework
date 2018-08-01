@@ -1,4 +1,4 @@
-# course_week: 
+# course_week: 2.2
 # description: Loop through a set of files, find the correlation between two variables, given the file holds more observations than a given threshold
 # make generic: no
 corr <- function(directory, threshold = 0) {

@@ -1,4 +1,4 @@
-# course_week: 
+# course_week: 2.2 
 # description: Loop through a set of files, combine all complete cases to a new data frame
 # make generic: yes
 pollutantmean <- function(directory, pollutant, id = 1:332) {

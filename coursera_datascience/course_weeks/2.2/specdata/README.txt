@@ -1,0 +1,1 @@
+removed 332 csv files to save space. The code in the parent directory won't work any more. Not really a problem. I'll just have to genericize that code and add some test files in here.

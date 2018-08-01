@@ -1,6 +1,6 @@
-# course_week:
+# course_week: 2.2
 # description: Loop through a set of files, count the number of complete observations and store them to a data frame.
-# make generic: no
+# make generic: yes
 complete <- function(directory, id = 1:332) {
     count_obs = data.frame()
     for (i in id){
