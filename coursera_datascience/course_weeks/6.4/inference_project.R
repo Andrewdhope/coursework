@@ -1,3 +1,8 @@
+# course_week:6.4  
+# description: generate a random sample from an exponential distribtution and show equivalence of the estimated sampling statistics to their theoretical values.
+# make generic: no
+
+
 sampling <- function() {
     r <- round(rexp(40000, rate = 0.2), 4)
     rmat <- matrix(r, 1000, 40)
@@ -11,6 +16,12 @@ sampling <- function() {
     qplot(r)
     qplot(sampling)
 }
+
+
+# course_week: 6.4 
+# description: explore a basic dataset and manually calculate t-values...? (seems incomplete, just a scratch/prep file)
+# make generic: no
+
 
 exploring <- function () {
     library(datasets)
