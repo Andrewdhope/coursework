@@ -1,0 +1,42 @@
+Regular expressions:
+- Literals:
+	+ whole character string
+- Metacharacters:
+	+ start of a line: ^
+	+ end of a line: $
+	+ set of characters: []
+		- lowercase or capitol 'bush': [Bb][Uu][Ss][Hh]
+	+ example: ^[Ii] am
+		- any case i to begin a  line
+	+ range of characters: [0-9][a-zA-z]
+	+ within a range syntax, caret is negation
+		- not ending in ? or . :[^?.]$ 
+	+ any character: .
+		- 9, any character, 11: 9.11
+	+ or: |
+		- flood|earthquake|hurricane|coldfire
+		- starting  good or bad anywhere: ^[Gg]ood|[Bb]ad
+		- starting with either bad or good: ^([Gg]ood|[Bb]ad)	
+	+ optional expression: ?
+		- [Gg]eorge( [Ww]\.)? [Bb]ush
+			+ dot is escaped with \ here
+	+ repeated any number of times (including none): *
+		- always matches the longest string possible (greedy)
+			+ (.*)
+		- make it less greedy with: (.*?)
+	+ at least one of: +
+		- at least one number, any number of characters: [0-9]+(.*)
+	+ number of times repeated: {}
+		- [Bb]ush( +[^ ]+ +){1,5} debate
+			+ bush, space, word, space (up to 5 times), debate
+		- at least but not more than: {m, n}
+		- exactly: {m}
+		- at least: {m }
+	+ remember a matched expression: () and \1, \2
+		- repeated words seperated by a space: ([a-zA-Z)+ +\1
+
+- Typically used with grep, grepl, sub, gsub
+	+ grep
+	+ grepl
+	+ sub
+	+ gsub
