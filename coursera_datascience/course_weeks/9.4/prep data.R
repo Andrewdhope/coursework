@@ -1,7 +1,9 @@
 prepdata <- function() {
+    
 library(dplyr)
 library(purrr)
 library(nbastatR)
+
 df.sal <- read.csv("NBASalaryRaw.csv")
 # traded players will repeat. will need to combine salaires when we get there (maybe at this point).
 df.sal <- df.sal[,2:4]
