@@ -1,6 +1,12 @@
+# course_week: 10
+# description: given a document term matrix, plot either 
+## a) a histogram of the top n most common words, or 
+## b) an analysis showing the cumulative frequency of terms
+# make generic: maybe
+
 build.histogram <- function(dtm, mode = "top", n = 20) {
     library(ggplot2)
-    freq <- colSums(as.matrix(dtm))
+    freq <- colSums(as.matrix(dtm)) # make a word-frequency list
     ord <- order(freq, decreasing = TRUE)
     ordered <- freq[ord]
     if (mode == "top") {

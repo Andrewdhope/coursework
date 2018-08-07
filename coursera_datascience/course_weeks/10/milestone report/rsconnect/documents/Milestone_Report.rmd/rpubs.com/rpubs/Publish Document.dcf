@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/398849/d85c85de57694c2ebfdd7774d52d480f
+bundleId: https://api.rpubs.com/api/v1/document/398849/d85c85de57694c2ebfdd7774d52d480f
+url: http://rpubs.com/andrewdhope/398849
+when: 1529703998.79349

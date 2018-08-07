@@ -1,4 +1,10 @@
- 
+# author: andrew hope
+# course_week: 10
+# description: compare a given n-gram to instances of that n-gram in a given dtm. 
+## Calculate the most likely next word using a maximum likelihood estimation.
+## If a candidate word is not found by searching the set of 3-grams, back-off to 2-gram and 1-gram dtms to complete the analysis.
+# make generic: no
+
 next.gram.candidates2 <- function(dtm, gram) {
     candidate.list <- list()
     #browser()

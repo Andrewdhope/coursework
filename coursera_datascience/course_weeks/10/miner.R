@@ -1,3 +1,6 @@
+# course_week: 10  
+# description: functions specific to cleaning and structuring data for NLP applications. Depends on tm package.
+# make generic: no
 
 ## PREPROCESSING ##
 

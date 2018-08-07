@@ -1,3 +1,9 @@
+# author: andrew hope
+# course_week: 10
+# description: test the accuracy of the n-gram prediction model by running on a sample of random 4-grams.
+# make generic: no
+
+
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/reader.R')
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/miner.R')
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/solver.R')

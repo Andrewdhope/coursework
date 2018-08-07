@@ -1,3 +1,8 @@
+# author: andrew hope
+# course_week: 10
+# description: functions to read lines from a large, simple text file. 
+# make generic: no
+
 reader.setwd <- function() {
     setwd("C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/data/final/en_US")
 }

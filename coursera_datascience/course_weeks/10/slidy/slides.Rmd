@@ -1,0 +1,51 @@
+---
+title: "Gram Guesser - Coursera Capstone"
+author: "Andrew Hope"
+date: "July 22, 2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Objective
+
+This project aims to demonstrate a natural language processing algorithm that can successfully guess the next word in a given phrase. The algorthm uses the previous three words in the phrase to generate its guess.  
+
+The model was trained on thousands of snippits of blogs scraped from the internet. Since this tool is meant to be an interactive utility, it is designed to mimic spoken conversation. The blogs training dataset most closely resembles spoken conversation, as compared to news clippings or tweets.
+
+<https://andrewdhope.shinyapps.io/guess-that-gram/>
+
+
+## Assumptions
+
+- Model trained with blog data only, since it represents spoken conversation better than news clippings or tweets.
+- A 3-gram is more predictive than a 1-gram. If the model can offer a guess using a 3-gram as input, it will suggest that guess without looking at lower-dimensional grams.
+- The data needed to run the model is designed to fit on 100MB server (even through a free shiny server offers more).
+
+
+## Analysis and Enhancements
+
+- The model is designed with a maximum likelihood estimation algorithm.
+- It depends on functions in the tm package to convert text-based datasets to tokenized document-term-matrices.
+- If a guess cannot be rendered with the 3-gram dataset, the model will "back off" to the 2-gram and 1-gram data
+- If the model cannot render a guess using 1-gram data, it will make a selection from an observed distribution of stopwords.
+- All punctuation, except apostrophes, are removed from the data before analysis.
+- All strings are converted to lowercase throughout the analysis.  
+
+### Enhancements
+- Use a larger n-gram dtm
+- Sparse entries removed in a dtm to compress a very large file
+- Use correlation between words for weighting rather than an MLE based on sequencing alone
+- Obtain a part-of-speech classifier to incorporate into the weight of a guess
+
+
+## Results
+
+- The model currently boasts an ~9% accuracy rate when tested against random 3-grams. It performs much better testing with humans, but I have not yet gathered enough data to establish a formal measure for the human-testing.
+- The model runs error-free and always returns a guess. It as a 0% NA rate.
+- Try the model yourself! You can attempt a set of tests and grade them as you go!  
+<https://andrewdhope.shinyapps.io/guess-that-gram/>
+
+

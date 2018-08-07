@@ -1,0 +1,181 @@
+---
+title: "Milestone Report"
+author: "Andrew Hope"
+date: "June 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(tm)
+library(ggplot2)
+```
+
+This report details initial steps taken in the Coursera-SwiftKey Data Science Capstone project. The report covers loading and preprocessing, planned analysis, and initial plots that summarize the data.
+
+## Problem Definition
+
+The inital task of the assignment is to load the data, clean it, and explore its properties. The methods that I select for this initial exploration depend on the problem that I plan to solve. The basic problem statement in this case is build a model that uses words to predict words.  
+
+I will create a model that takes an n-gram as input, and predicts the next word. The assignment hints at a liklihood to hit computational constraints during model development, which I will keep in mind during this exploratory phase.
+
+## Loading and Preprocessing
+
+To begin, I downloaded the required text files for the three sources: blogs, twitter, and news.  
+
+The files are each very large. I can execute initial exploration and model planning without using the entire file. I decided to generate modified versions of the three files that contain 10,000 randomly sampled lines of text. This is a large enough sample to draw valid conclusions, while also allowing the code to execute quickly in this early stage. 
+
+```{r loading, cache = TRUE, echo = FALSE}
+
+reader.all <- function(filename) {
+    n <- 0
+    end <- FALSE
+    
+ con <- file(filename, "rb")
+ line <- readLines(con, 1) # read first line
+ while ( length(line) != 0 ) {
+    # operate on the first line
+    val <- innerLoop(line)
+    if (val == 1) {
+        if (n == 0) {set <- line}
+        else {
+            preset.operation(line)
+            set <- rbind(set, line, deparse.level = 0)
+        }
+        n = n+1
+    }
+    end <- (n > 9999) # breakLoop(line, val, n)
+    if (end) {break}
+    line <- readLines(con, 1) # read next line
+ }
+ close(con)
+ set
+}
+
+preset.operation <- function(line) {
+    return
+}
+
+innerLoop <- function(line) {
+    # pop in a quick function
+    rbinom(1, 1, 0.05)
+    # grep("biostats", line, value = TRUE)
+}
+
+breakLoop <- function(line, val, n) {
+    # break conditional
+
+}
+```
+
+```{r objects, cache = TRUE, results = "hide"}
+blogs <- reader.all("./data/final/en_US/en_US.blogs.txt")
+twitter <- reader.all("./data/final/en_US/en_US.twitter.txt")
+news <- reader.all("./data/final/en_US/en_US.news.txt")
+```
+
+I then generated a corpus object for each dataset using the tm() package.
+
+```{r corpus, cache = TRUE, echo = FALSE}
+    b.corpus <- VCorpus(VectorSource(blogs))
+    t.corpus <- VCorpus(VectorSource(twitter))
+    n.corpus <- VCorpus(VectorSource(news))
+```
+
+The goal of this project is to use words to predict words. At this point it seems that punctuation should not influence model development. Keeping punctuation will interfere with clean tokenization. Therefore, to aid tokenization and reduce the total number of unique grams in a corpus, I removed punctuation and converted all letters to lowercase.
+
+```{r cleaning, cache = TRUE}
+
+clean.corpus <- function(corpus) {
+    tm_map(corpus, removePunctuation)
+    repair.apostrophe <- content_transformer(function(x) {return (gsub("â€™", "'", x))})
+    tm_map(corpus, repair.apostrophe)
+    tm_map(corpus, content_transformer(tolower))
+    corpus
+}
+
+```
+
+```{r clean, cache = TRUE}
+    b.corpus <- clean.corpus(b.corpus)
+    t.corpus <- clean.corpus(t.corpus)
+    n.corpus <- clean.corpus(n.corpus)
+```
+
+After cleaning the corpus objects, I converted them to a document table matrix for further analysis.
+
+```{r dtm, cache = TRUE}
+    b.dtm <- DocumentTermMatrix(b.corpus)
+    t.dtm <- DocumentTermMatrix(t.corpus)
+    n.dtm <- DocumentTermMatrix(n.corpus)
+```
+
+Next steps: convert corpus to a 2-gram corpus and construct a new DTM for further analysis.
+
+## Planned Analysis
+
+I am planning this analysis by keeing the overall objective in mind: words predicting words.  
+
+The first decision is to keep stopwords within the text. While stopwords do not add much information in terms of meaning, they are useful in predicing the next word in a sequence, when order of the words matter.  
+
+The initial analysis will keep the stopwords, but they may be removed in further analysis. This may be required because stopwords may dominate non-stopwords, at least in frequency-based metrics. For instance, perhaps the model will produce both a stopword suggestion and a non-stopword suggestion for the user.  
+
+As stated above, punctuation does not appear to add significant information into the model, and leaving it would confound the analysis. It is removed now, but this assumption will be revisited later in the project. The same is true for uppercase letters.
+
+One potential technique to explore further is stemming. Stemming attempts to eliminate a word suffix and only keep the root of the word. This technique may complicate the analysis quite a bit, so I will wait until there is an observed need for this technique before using it.  
+
+Another potential direction will be to look at association between words within the DTM. Association (aka correlation) provides a measure of how often two grams appear in the same DTM column. A potential application would be a method to handle unseen n-grams. When the model encounters an unseen n-gram, return the leading association of its (n-1)-grams.  
+
+## Tables and Plots
+
+Presented here are three useful plots. 
+
+First, a histogram that displays the top 20 1-grams used in each dataset. The top 20 will be predominantly stopwords, which emphasizes the need to keep stopwords in the dataset when generating the model.
+
+```{r build.plots, cache = TRUE, results = "hide"}
+build.histogram <- function(dtm, mode = "top", n = 20) {
+    library(ggplot2)
+    freq <- colSums(as.matrix(dtm))
+    ord <- order(freq, decreasing = TRUE)
+    ordered <- freq[ord]
+    if (mode == "top") {
+            points <- ordered[1:n]
+    }
+    if (mode == "min") {
+        points <- ordered[ordered > n]    
+    }
+    df <- data.frame(gram = names(points), count = points)
+    p <- ggplot(df, aes(gram, count))
+    p <- p + geom_bar(stat = "identity")
+    p <- p + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    p
+}
+
+build.pareto <- function(dtm) {
+    library(ggplot2)
+    freq <- colSums(as.matrix(dtm))
+    ord <- order(freq, decreasing = TRUE)
+    ordered <- freq[ord]
+    running.total <- sapply(seq_along(ordered), function(x){sum(ordered[1:x])})
+    p <- qplot(seq_along(running.total), running.total/running.total[length(running.total)], xlab = "Top Grams", ylab = "Instances (%)")
+    p
+}
+```
+
+```{r histogram.top, cache = TRUE}
+    build.histogram(b.dtm)
+```
+
+Next, a histogram that displays 1-grams that appear a minimum number of times in the dataset.
+
+```{r histogram.min, cache = TRUE}
+    build.histogram(b.dtm, mode = "min", n = 1000)
+```
+
+The third plot answers the question: "how many unique grams make up X% of total instances?"  
+
+```{r plot, cache = TRUE}
+    build.pareto(b.dtm)
+```
+
+This last plot shows a small number (~15%) of grams account for a large number (~85%) of total instances. The distribution is very top-heavy. A model will likely over-suggest thest top-most words. The challenge will be to determine when a less-likely word is appropriate to suggest. Perhaps weighting by something unrelated to frequency would be beneficial.

@@ -1,3 +1,9 @@
+# author: andrew hope
+# course_week: 10
+# description: functions to execute the business logic from start to finish.
+## written for the Coursera Data Science Specialization Capstone in July 2018.
+# make generic: no
+
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/reader.R')
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/miner.R')
 source('C:/Users/ahope/Desktop/_MyFiles/repos/coursework/coursera_datascience/course_weeks/10/solver.R')
