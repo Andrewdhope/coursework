@@ -22,7 +22,8 @@ main <- function(filename) {
 
 
 #
-#
+# create a set of (m x n) document term matrices used for gram lookup.
+# lower order (m x n) dtms are used for a back-off procedure.
 # n: the n-grams that this compressed file will be used to predict (1, 2, 3)    
 #
 #
@@ -57,21 +58,24 @@ solve3 <- function(gram, mode) {
         n.gram <- character()    
         filename.dtm <- makefilename.dtm(mode, n)
         load.dtm <- load(filename.dtm)
+        # if n is one, always take the last word in the gram
         if (n == 1) {
             n.gram <- strsplit(gram, " ")[[1]][len]
         }
+        # else take the last n words in the given gram
         else {
             for (i in c((len-n+1):len)) {
                 n.gram <- paste(n.gram, strsplit(gram, " ")[[1]][i], sep = " ")
             }
         }
         n.gram <- trimws(n.gram) # trim leading space
-        print(n.gram)
-        print(filename.dtm)
-        candidate.list <- next.gram.candidates2(dtm, n.gram)
+        # print(n.gram)
+        # print(filename.dtm)
+        candidate.list <- next.gram.candidates2(dtm, n.gram) 
         if (length(candidate.list) > 0) {
-            break} # UGLY. WILL REPLACE WITH TRY-CATCH.
+            break} 
     }
+    # use this hueristic if the loop above doesn't produce a candidate
     if (n == 1) {
         load("freq.dist.txt.gz")
         candidate.list[[1]] <- 1

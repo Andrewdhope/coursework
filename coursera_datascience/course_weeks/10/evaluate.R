@@ -1,6 +1,7 @@
 # author: andrew hope
 # course_week: 10
 # description: test the accuracy of the n-gram prediction model by running on a sample of random 4-grams.
+# not production code. for testing and evaluation only.
 # make generic: no
 
 
