@@ -4,6 +4,8 @@
 
 ## PREPROCESSING ##
 
+# use standard functions in the tm library to clean a corpus of strings
+# remove punctuation, replace character sequences with apostrophes, conver to lowercase
 clean.corpus <- function(corpus) {
     corpus <- tm_map(corpus, removePunctuation)
     repair.apostrophe <- content_transformer(function(x) {return (gsub("â€™", "'", x))})
@@ -31,7 +33,7 @@ freq.list <- function(dtm, threshold = 0.85) {
     running.total <- 0
     
     while (done != TRUE) {
-        total.grams <- sum(freq)
+        total.grams <- sum(freq) # should move this out of the loop.
         running.total <- running.total + ordered[[i]]
         if ((running.total / total.grams) > threshold) {done = TRUE}
         i <- i+1
@@ -42,13 +44,13 @@ freq.list <- function(dtm, threshold = 0.85) {
 
 
 #
-# given a cleaned corpus, make a corpus with the new documents being tokenized n-grams of the incoming documents.
+# given a cleaned corpus, make a corpus with the new corpus's documents being tokenized n-grams of the incoming documents.
 #
 make.ngram.corpus <- function(corpus, n) {
     object <- sapply(corpus, strwrap) # convert corpus to vector
     object <- sapply(object, Boost_tokenizer) # tokenize
     object <- unlist(object, use.names = T)
-    object <- ngrams(object, n)
+    object <- ngrams(object, n) # tm function
     object <- VCorpus(VectorSource(object))
     object
 }

@@ -14,21 +14,23 @@ write.abbrev <- function(readname, writename, limit) {
     close(fileConn)
 }
 
+# generic text file reader.
+# can take a limit argument, to read a subset of lines from a large file.
 reader.subset <- function(filename, limit) {
     n <- 0
     end <- FALSE
     
- con <- file(filename, "rb")
+ con <- file(filename, "rb") # rb for read binary. handles encoding properly.
  line <- readLines(con, 1) # read first line
  l <- 1
  while ( length(line) != 0 ) {
     # operate on the first line
     l <- l + 1
-    val <- innerLoop(line)
+    val <- innerLoop(line) # optional function to limit which lines we read in.
     if (!(l %% 4) > 0) {
         if (n == 0) {set <- line}
         else {
-            preset.operation(line)
+            preset.operation(line) # optional function to pre-process a selected line.
             set <- rbind(set, line, deparse.level = 0)
         }
         n = n+1
@@ -56,6 +58,7 @@ breakLoop <- function(line, val, n) {
 
 }
 
+# simply read the first n lines.
 reader.some <- function(filename, n) {
     con <- file(filename, "rb")
     lines <- readLines(con, n)   
@@ -63,6 +66,7 @@ reader.some <- function(filename, n) {
     lines
 }
 
+# read all lines.
 reader.all <- function(filename) {
     con <- file(filename, "rb")
     lines <- readLines(con)   
